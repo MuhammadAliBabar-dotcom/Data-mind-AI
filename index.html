@@ -1,0 +1,3031 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DataMind AI — Intelligent Analytics &amp; Machine Learning</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  :root{
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --line:#e8edf6;
+    --ink:#0f172a;
+    --ink2:#334155;
+    --muted:#7b8aa3;
+    --blue:#3b6ef6;
+    --blue2:#5b8cff;
+    --violet:#8b5cf6;
+    --green:#10b981;
+    --amber:#f59e0b;
+    --red:#ef4444;
+    --nav:#0a1120;
+    --nav2:#101c33;
+    --radius:18px;
+    --shadow:0 1px 2px rgba(15,23,42,.05), 0 12px 32px -22px rgba(15,23,42,.45);
+    --shadow-lg:0 24px 60px -30px rgba(15,23,42,.45);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    background:var(--bg);color:var(--ink);
+    -webkit-font-smoothing:antialiased;font-size:14.5px;line-height:1.55;
+  }
+  ::selection{background:rgba(59,110,246,.2)}
+  button{font-family:inherit}
+  h1,h2,h3,h4{margin:0;letter-spacing:-.02em}
+  a{color:inherit;text-decoration:none}
+
+  /* ============ SHELL ============ */
+  .app{min-height:100vh}
+  .sidebar{
+    position:fixed;inset:0 auto 0 0;width:264px;z-index:60;
+    background:linear-gradient(180deg,#0a1120 0%,#101c33 55%,#0a1120 100%);
+    color:#c7d3e6;display:flex;flex-direction:column;
+    transition:width .26s cubic-bezier(.4,0,.2,1), transform .3s cubic-bezier(.4,0,.2,1);
+    border-right:1px solid rgba(255,255,255,.06);
+  }
+  .brand{display:flex;align-items:center;gap:12px;padding:20px 18px 18px;position:relative}
+  .brand-logo{
+    width:40px;height:40px;flex:0 0 40px;border-radius:12px;display:grid;place-items:center;
+    background:linear-gradient(135deg,#3b6ef6,#8b5cf6);
+    box-shadow:0 8px 22px -8px rgba(99,102,241,.9);
+  }
+  .brand-logo svg{width:21px;height:21px;color:#fff}
+  .brand-text{display:flex;flex-direction:column;overflow:hidden;white-space:nowrap}
+  .brand-text strong{font-size:15.5px;color:#fff;font-weight:700;letter-spacing:-.02em}
+  .brand-text span{font-size:11.5px;color:#7d90ad;letter-spacing:.02em}
+  .collapse-btn{
+    position:absolute;right:10px;top:50%;transform:translateY(-50%);
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+    color:#9fb0c9;width:27px;height:27px;border-radius:9px;display:grid;place-items:center;cursor:pointer;
+    transition:.18s;opacity:0;
+  }
+  .sidebar:hover .collapse-btn{opacity:1}
+  .collapse-btn:hover{background:rgba(255,255,255,.14);color:#fff}
+  .collapse-btn svg{width:15px;height:15px}
+
+  .nav{flex:1;overflow-y:auto;padding:6px 12px 18px;scrollbar-width:thin;scrollbar-color:#22314d transparent}
+  .nav::-webkit-scrollbar{width:6px}
+  .nav::-webkit-scrollbar-thumb{background:#22314d;border-radius:99px}
+  .nav-label{
+    font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:#5d708e;
+    margin:16px 12px 8px;font-weight:700;white-space:nowrap;
+  }
+  .nav-item{
+    display:flex;align-items:center;gap:12px;padding:10px 13px;border-radius:12px;
+    color:#93a4bf;font-size:13.8px;font-weight:500;cursor:pointer;
+    transition:background .16s,color .16s;position:relative;white-space:nowrap;overflow:hidden;
+    margin-bottom:2px;
+  }
+  .nav-item svg{width:18px;height:18px;flex:0 0 18px;stroke-width:1.9}
+  .nav-item:hover{background:rgba(255,255,255,.055);color:#e6eefc}
+  .nav-item.active{
+    background:linear-gradient(90deg,rgba(59,110,246,.24),rgba(139,92,246,.14));
+    color:#fff;box-shadow:inset 0 0 0 1px rgba(120,160,255,.22);
+  }
+  .nav-item.active::before{
+    content:'';position:absolute;left:0;top:22%;height:56%;width:3px;border-radius:3px;
+    background:linear-gradient(180deg,#5b8cff,#a78bfa);
+  }
+  .nav-item .badge{
+    margin-left:auto;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;
+    background:rgba(59,110,246,.22);color:#9dc0ff;
+  }
+  .sidebar-foot{padding:14px;border-top:1px solid rgba(255,255,255,.07)}
+  .engine-pill{
+    display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:12px;
+    background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.22);
+    font-size:11.5px;color:#7fe3c0;white-space:nowrap;overflow:hidden;
+  }
+  .dot{width:7px;height:7px;border-radius:99px;background:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.18);flex:0 0 7px}
+
+  .app.collapsed .sidebar{width:78px}
+  .app.collapsed .brand-text,
+  .app.collapsed .nav-label,
+  .app.collapsed .nav-item span,
+  .app.collapsed .nav-item .badge,
+  .app.collapsed .engine-pill span{display:none}
+  .app.collapsed .nav-item{justify-content:center;padding:11px 0}
+  .app.collapsed .brand{justify-content:center;padding:20px 0 18px}
+  .app.collapsed .collapse-btn{display:none}
+  .app.collapsed .engine-pill{justify-content:center;padding:10px 0}
+
+  .main{margin-left:264px;min-width:0;display:flex;flex-direction:column;min-height:100vh;
+        transition:margin-left .26s cubic-bezier(.4,0,.2,1)}
+  .app.collapsed .main{margin-left:78px}
+
+  /* ============ TOPBAR ============ */
+  .topbar{
+    position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:14px;
+    padding:12px 24px;background:rgba(245,247,251,.82);
+    backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);
+    border-bottom:1px solid rgba(232,237,246,.9);
+  }
+  .menu-btn{
+    display:none;background:#fff;border:1px solid var(--line);border-radius:11px;
+    width:38px;height:38px;place-items:center;cursor:pointer;color:var(--ink2);
+  }
+  .menu-btn svg{width:19px;height:19px}
+  .crumb{display:flex;flex-direction:column;min-width:0}
+  .crumb h2{font-size:16.5px;font-weight:700}
+  .crumb span{font-size:11.8px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .top-actions{margin-left:auto;display:flex;align-items:center;gap:9px}
+  .chip{
+    display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:99px;
+    background:#fff;border:1px solid var(--line);font-size:12px;font-weight:600;color:var(--ink2);
+    white-space:nowrap;box-shadow:0 1px 2px rgba(15,23,42,.04);
+  }
+  .chip svg{width:14px;height:14px}
+  .chip.ok{background:#effbf6;border-color:#c9f1e2;color:#0b8a63}
+  .icon-btn{
+    width:37px;height:37px;border-radius:11px;background:#fff;border:1px solid var(--line);
+    display:grid;place-items:center;cursor:pointer;color:var(--ink2);transition:.16s;
+    box-shadow:0 1px 2px rgba(15,23,42,.04);
+  }
+  .icon-btn:hover{color:var(--blue);border-color:#c7d8ff;transform:translateY(-1px)}
+  .icon-btn svg{width:17px;height:17px}
+  .avatar{
+    width:37px;height:37px;border-radius:11px;display:grid;place-items:center;font-weight:700;font-size:13px;
+    color:#fff;background:linear-gradient(135deg,#3b6ef6,#8b5cf6);box-shadow:0 8px 18px -10px rgba(99,102,241,.9);
+  }
+
+  /* ============ PAGE ============ */
+  .page{padding:22px 24px 70px;width:100%;max-width:1440px;margin:0 auto;flex:1}
+  .view{display:none;animation:fade .32s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);
+  }
+  .pad{padding:20px}
+  .card-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .card-head h3{font-size:14.6px;font-weight:700}
+  .card-head .sub{font-size:12px;color:var(--muted);font-weight:500}
+  .card-head > :last-child{margin-left:auto}
+  .link-btn{
+    background:none;border:none;color:var(--blue);font-size:12.5px;font-weight:600;cursor:pointer;
+    padding:4px 6px;border-radius:8px;transition:.16s;
+  }
+  .link-btn:hover{background:#eef3ff}
+
+  .grid-2{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;margin-top:18px}
+  .grid-2-eq{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+  @media(max-width:1100px){.grid-2,.grid-2-eq{grid-template-columns:1fr}}
+
+  /* ============ HERO ============ */
+  .hero{
+    position:relative;overflow:hidden;border-radius:22px;padding:30px 32px;
+    background:linear-gradient(120deg,#0d1a33 0%,#152a55 45%,#2a2170 100%);
+    color:#fff;box-shadow:var(--shadow-lg);
+    display:grid;grid-template-columns:1fr 260px;gap:24px;align-items:center;
+  }
+  .hero::after{
+    content:'';position:absolute;width:440px;height:440px;right:-140px;top:-190px;border-radius:50%;
+    background:radial-gradient(circle,rgba(139,92,246,.55),transparent 65%);filter:blur(12px);
+  }
+  .hero::before{
+    content:'';position:absolute;width:360px;height:360px;left:36%;bottom:-240px;border-radius:50%;
+    background:radial-gradient(circle,rgba(59,110,246,.5),transparent 65%);filter:blur(10px);
+  }
+  .hero-text{position:relative;z-index:2}
+  .pill{
+    display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:99px;
+    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);
+    font-size:11.5px;font-weight:600;letter-spacing:.02em;color:#dbe6ff;
+  }
+  .pill svg{width:13px;height:13px}
+  .hero h1{font-size:29px;line-height:1.22;margin:14px 0 10px;font-weight:800;letter-spacing:-.03em}
+  .hero h1 .grad{background:linear-gradient(90deg,#8fb6ff,#c4a5ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{color:#a9bbd8;font-size:13.6px;max-width:560px;margin:0 0 20px}
+  .hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+  .hero-art{position:relative;z-index:2;display:flex;justify-content:center}
+  .art-card{
+    background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);border-radius:16px;
+    padding:14px;width:100%;backdrop-filter:blur(6px);
+  }
+  .art-row{display:flex;align-items:center;gap:9px;margin-bottom:9px;font-size:11.5px;color:#c3d3ee}
+  .art-row:last-child{margin-bottom:0}
+  .art-bar{height:7px;border-radius:99px;background:rgba(255,255,255,.14);flex:1;overflow:hidden}
+  .art-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#5b8cff,#a78bfa)}
+
+  /* ============ BUTTONS ============ */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:10px 16px;border-radius:11px;font-size:13px;font-weight:600;cursor:pointer;
+    border:1px solid transparent;transition:transform .15s,box-shadow .15s,background .15s,color .15s;
+    white-space:nowrap;
+  }
+  .btn svg{width:16px;height:16px}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{
+    background:linear-gradient(135deg,#3b6ef6,#6d5cf6);color:#fff;
+    box-shadow:0 10px 24px -12px rgba(59,110,246,.95);
+  }
+  .btn-primary:hover{box-shadow:0 14px 30px -12px rgba(59,110,246,1);transform:translateY(-1px)}
+  .btn-white{background:#fff;color:#1c2b4a;border-color:rgba(255,255,255,.6);box-shadow:0 8px 20px -14px rgba(0,0,0,.6)}
+  .btn-white:hover{transform:translateY(-1px)}
+  .btn-ghost{background:rgba(255,255,255,.1);color:#e6eeff;border-color:rgba(255,255,255,.2)}
+  .btn-ghost:hover{background:rgba(255,255,255,.18)}
+  .btn-outline{background:#fff;color:var(--ink2);border-color:var(--line);box-shadow:0 1px 2px rgba(15,23,42,.04)}
+  .btn-outline:hover{border-color:#c7d8ff;color:var(--blue);transform:translateY(-1px)}
+  .btn-danger{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+  .btn-danger:hover{background:#fee2e2}
+  .btn-sm{padding:7px 12px;font-size:12.3px;border-radius:9px}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+
+  /* ============ STATS ============ */
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:18px}
+  @media(max-width:1000px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.stat-grid{grid-template-columns:1fr}}
+  .stat{
+    background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px 18px;
+    box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;
+  }
+  .stat:hover{transform:translateY(-3px);box-shadow:0 18px 40px -26px rgba(15,23,42,.5)}
+  .stat-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .stat-ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:0 0 34px}
+  .stat-ico svg{width:17px;height:17px}
+  .stat-label{font-size:11.6px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  .stat-value{font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+  .stat-foot{font-size:11.8px;color:var(--muted);margin-top:5px}
+
+  /* ============ TABLES ============ */
+  .table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
+  table.dt{width:100%;border-collapse:collapse;font-size:12.8px;min-width:420px}
+  table.dt th{
+    text-align:left;padding:10px 13px;background:#f8fafd;color:#5b6b85;font-weight:700;
+    font-size:11.4px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;
+    border-bottom:1px solid var(--line);position:sticky;top:0;
+  }
+  table.dt td{padding:9px 13px;border-bottom:1px solid #f1f5fa;color:var(--ink2);white-space:nowrap;max-width:280px;overflow:hidden;text-overflow:ellipsis}
+  table.dt tr:last-child td{border-bottom:none}
+  table.dt tbody tr:hover td{background:#f8fbff}
+  .num{font-variant-numeric:tabular-nums;text-align:right}
+  .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12.4px}
+
+  .pager{display:flex;align-items:center;gap:8px;justify-content:flex-end;padding-top:12px;flex-wrap:wrap}
+  .pager span{font-size:12px;color:var(--muted);margin-right:auto}
+
+  /* ============ EMPTY ============ */
+  .empty{
+    text-align:center;padding:46px 20px;color:var(--muted);
+    border:1.5px dashed #dbe4f2;border-radius:16px;background:linear-gradient(180deg,#fbfcff,#f6f9fe);
+  }
+  .empty-ico{
+    width:54px;height:54px;border-radius:16px;margin:0 auto 14px;display:grid;place-items:center;
+    background:linear-gradient(135deg,#eef3ff,#f3efff);border:1px solid #e2eaff;color:var(--blue);
+  }
+  .empty-ico svg{width:24px;height:24px}
+  .empty h4{font-size:14.5px;color:var(--ink);margin-bottom:6px}
+  .empty p{font-size:12.8px;margin:0 auto 16px;max-width:420px}
+
+  /* ============ DROPZONE ============ */
+  .dropzone{
+    border:2px dashed #cfdcf3;border-radius:20px;padding:44px 24px;text-align:center;cursor:pointer;
+    background:linear-gradient(180deg,#fbfcff,#f4f8ff);transition:.22s;position:relative;
+  }
+  .dropzone:hover,.dropzone.drag{border-color:var(--blue);background:linear-gradient(180deg,#f5f9ff,#eaf2ff);transform:scale(1.004)}
+  .dz-ico{
+    width:64px;height:64px;border-radius:20px;margin:0 auto 16px;display:grid;place-items:center;
+    background:linear-gradient(135deg,#3b6ef6,#8b5cf6);color:#fff;
+    box-shadow:0 18px 36px -18px rgba(99,102,241,.95);
+  }
+  .dz-ico svg{width:28px;height:28px}
+  .dropzone h4{font-size:16px;margin-bottom:6px}
+  .dropzone p{font-size:12.8px;color:var(--muted);margin:0 0 18px}
+
+  /* ============ CHAT ============ */
+  .chat-shell{display:flex;flex-direction:column;height:min(640px,calc(100vh - 210px));min-height:420px}
+  .chat-body{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px}
+  .chat-body::-webkit-scrollbar{width:7px}
+  .chat-body::-webkit-scrollbar-thumb{background:#dbe4f2;border-radius:99px}
+  .msg{display:flex;gap:10px;max-width:88%;animation:fade .28s ease}
+  .msg.user{margin-left:auto;flex-direction:row-reverse}
+  .msg-avatar{
+    width:32px;height:32px;border-radius:10px;flex:0 0 32px;display:grid;place-items:center;
+    font-size:11.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,#3b6ef6,#8b5cf6);
+  }
+  .msg.user .msg-avatar{background:linear-gradient(135deg,#0f172a,#334155)}
+  .msg-avatar svg{width:16px;height:16px}
+  .bubble{
+    background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 15px;
+    font-size:13.2px;color:var(--ink2);box-shadow:0 1px 2px rgba(15,23,42,.04);line-height:1.6;
+    overflow-x:auto;
+  }
+  .msg.user .bubble{
+    background:linear-gradient(135deg,#3b6ef6,#6d5cf6);color:#fff;border-color:transparent;
+    box-shadow:0 12px 26px -18px rgba(59,110,246,.95);
+  }
+  .bubble strong{color:var(--ink);font-weight:700}
+  .msg.user .bubble strong{color:#fff}
+  .bubble .mini-table{margin-top:10px;font-size:11.8px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .bubble .mini-table table{width:100%;border-collapse:collapse;min-width:220px}
+  .bubble .mini-table th{background:#f7fafd;padding:6px 9px;text-align:left;font-size:10.6px;text-transform:uppercase;letter-spacing:.05em;color:#64748b}
+  .bubble .mini-table td{padding:6px 9px;border-top:1px solid #f1f5fa}
+  .sql-tag{
+    display:inline-block;margin-top:9px;font-family:'JetBrains Mono',monospace;font-size:11.2px;
+    background:#0f172a;color:#a5b8ff;padding:8px 11px;border-radius:9px;white-space:pre-wrap;word-break:break-word;
+  }
+  .typing{display:flex;gap:4px;align-items:center;padding:4px 0}
+  .typing i{width:7px;height:7px;border-radius:99px;background:#b6c4da;animation:blink 1.2s infinite}
+  .typing i:nth-child(2){animation-delay:.2s}
+  .typing i:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
+  .chat-input-bar{
+    border-top:1px solid var(--line);padding:14px;display:flex;gap:10px;align-items:flex-end;
+    background:#fcfdff;border-radius:0 0 var(--radius) var(--radius);
+  }
+  .chat-input{
+    flex:1;border:1px solid var(--line);border-radius:13px;padding:11px 14px;font-size:13.4px;
+    font-family:inherit;resize:none;max-height:120px;outline:none;transition:.18s;background:#fff;color:var(--ink);
+  }
+  .chat-input:focus{border-color:#a9c2ff;box-shadow:0 0 0 4px rgba(59,110,246,.1)}
+  .sugg{display:flex;gap:8px;flex-wrap:wrap;padding:0 14px 12px}
+  .sugg button{
+    background:#fff;border:1px solid var(--line);border-radius:99px;padding:6px 12px;
+    font-size:11.8px;color:#526párr;color:#526b8c;font-weight:500;cursor:pointer;transition:.16s;
+  }
+  .sugg button:hover{border-color:#b9cdff;color:var(--blue);background:#f6f9ff;transform:translateY(-1px)}
+
+  /* ============ FORM ============ */
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:11.8px;font-weight:700;color:#5b6b85;text-transform:uppercase;letter-spacing:.05em}
+  select,input[type=text],input[type=number],textarea{
+    width:100%;border:1px solid var(--line);border-radius:11px;padding:10px 12px;font-size:13.2px;
+    font-family:inherit;background:#fff;color:var(--ink);outline:none;transition:.18s;
+  }
+  select:focus,input:focus,textarea:focus{border-color:#a9c2ff;box-shadow:0 0 0 4px rgba(59,110,246,.1)}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+
+  /* ============ SQL ============ */
+  .sql-out{
+    background:linear-gradient(160deg,#0b1220,#152340);border-radius:14px;padding:16px 18px;
+    font-family:'JetBrains Mono',monospace;font-size:12.9px;color:#bcd0ff;white-space:pre-wrap;
+    word-break:break-word;line-height:1.75;border:1px solid #1e3055;position:relative;min-height:74px;
+  }
+  .sql-out .kw{color:#7aa2ff;font-weight:600}
+  .sql-out .fn{color:#c4a5ff;font-weight:600}
+  .copy-btn{
+    position:absolute;top:10px;right:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+    color:#a5b8ff;border-radius:8px;padding:5px 9px;font-size:11px;cursor:pointer;display:flex;gap:5px;align-items:center;
+  }
+  .copy-btn:hover{background:rgba(255,255,255,.16)}
+  .copy-btn svg{width:12px;height:12px}
+
+  /* ============ INSIGHTS ============ */
+  .insight-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .insight{
+    background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;
+    box-shadow:var(--shadow);transition:.2s;position:relative;overflow:hidden;
+  }
+  .insight:hover{transform:translateY(-3px);box-shadow:0 20px 44px -30px rgba(15,23,42,.55)}
+  .insight-top{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+  .insight-ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:0 0 34px}
+  .insight-ico svg{width:17px;height:17px}
+  .insight h4{font-size:13.4px;font-weight:700;flex:1}
+  .tag{
+    font-size:9.8px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    padding:3px 8px;border-radius:99px;
+  }
+  .tag.fact{background:#eef4ff;color:#2c5bd4}
+  .tag.ai{background:#f5efff;color:#7c3aed}
+  .tag.warn{background:#fff7ed;color:#b45309}
+  .insight p{margin:0;font-size:12.9px;color:#526179;line-height:1.62}
+  .insight .kv{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+  .kv span{
+    font-size:11.4px;background:#f7fafd;border:1px solid var(--line);border-radius:8px;
+    padding:3px 9px;color:#4a5a75;font-weight:600;
+  }
+
+  /* ============ ACTIVITY ============ */
+  .activity{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+  .activity li{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #f4f7fc}
+  .activity li:last-child{border-bottom:none}
+  .act-ico{
+    width:28px;height:28px;flex:0 0 28px;border-radius:9px;display:grid;place-items:center;
+    background:#eef3ff;color:var(--blue);
+  }
+  .act-ico svg{width:14px;height:14px}
+  .act-body{flex:1;min-width:0}
+  .act-body p{margin:0;font-size:12.6px;color:var(--ink2);line-height:1.45}
+  .act-body span{font-size:11px;color:var(--muted)}
+
+  /* ============ QUICK ACTIONS ============ */
+  .qa-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:11px}
+  .qa{
+    text-align:left;background:#fbfcff;border:1px solid var(--line);border-radius:13px;padding:13px;
+    cursor:pointer;transition:.18s;display:flex;flex-direction:column;gap:8px;
+  }
+  .qa:hover{border-color:#c0d3ff;background:#f6f9ff;transform:translateY(-2px);box-shadow:0 12px 26px -22px rgba(59,110,246,.9)}
+  .qa-ico{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,#eef3ff,#f4efff);color:var(--blue)}
+  .qa-ico svg{width:15px;height:15px}
+  .qa strong{font-size:12.5px;font-weight:700;color:var(--ink)}
+  .qa small{font-size:11px;color:var(--muted);line-height:1.35}
+
+  /* ============ CHART ============ */
+  .chart-box{position:relative;height:290px;width:100%}
+  .chart-box.sm{height:230px}
+  .hint{font-size:11.8px;color:var(--muted);margin:10px 0 0}
+
+  /* ============ MISC ============ */
+  .section-title{font-size:17px;font-weight:800;letter-spacing:-.02em;margin-bottom:3px}
+  .section-sub{font-size:13px;color:var(--muted);margin-bottom:18px}
+  .mt18{margin-top:18px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .tone-blue{background:#eef3ff;color:#2c5bd4}
+  .tone-violet{background:#f5efff;color:#7c3aed}
+  .tone-green{background:#eafaf3;color:#0b8a63}
+  .tone-amber{background:#fff7ed;color:#b45309}
+  .tone-red{background:#fef2f2;color:#b91c1c}
+  .tone-slate{background:#f1f5f9;color:#475569}
+
+  /* Toast */
+  .toasts{position:fixed;bottom:22px;right:22px;z-index:200;display:flex;flex-direction:column;gap:10px;max-width:340px}
+  .toast{
+    display:flex;gap:10px;align-items:flex-start;background:#0f172a;color:#e6eefc;padding:12px 15px;
+    border-radius:13px;font-size:12.8px;box-shadow:0 22px 44px -20px rgba(0,0,0,.6);
+    animation:slideIn .28s cubic-bezier(.4,0,.2,1);border:1px solid rgba(255,255,255,.08);
+  }
+  .toast svg{width:16px;height:16px;flex:0 0 16px;margin-top:1px}
+  .toast.ok svg{color:#34d399}
+  .toast.err svg{color:#f87171}
+  .toast.info svg{color:#60a5fa}
+  @keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+
+  /* Loading overlay */
+  .loader-mask{
+    position:fixed;inset:0;background:rgba(15,23,42,.42);backdrop-filter:blur(3px);z-index:150;
+    display:none;place-items:center;
+  }
+  .loader-mask.on{display:grid}
+  .loader-card{
+    background:#fff;border-radius:18px;padding:26px 32px;display:flex;flex-direction:column;
+    align-items:center;gap:14px;box-shadow:var(--shadow-lg);
+  }
+  .spinner{
+    width:38px;height:38px;border-radius:50%;border:3px solid #e5edfb;border-top-color:var(--blue);
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loader-card p{margin:0;font-size:13px;font-weight:600;color:var(--ink2)}
+
+  /* Switch */
+  .switch{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:12.8px;color:var(--ink2);font-weight:500}
+  .switch input{display:none}
+  .track{width:40px;height:22px;border-radius:99px;background:#dbe4f2;position:relative;transition:.22s;flex:0 0 40px}
+  .track::after{content:'';position:absolute;width:16px;height:16px;border-radius:99px;background:#fff;top:3px;left:3px;transition:.22s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .switch input:checked + .track{background:linear-gradient(135deg,#3b6ef6,#8b5cf6)}
+  .switch input:checked + .track::after{left:21px}
+
+  /* checkbox cards */
+  .opt-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:11px}
+  .opt{
+    display:flex;gap:11px;align-items:flex-start;padding:13px 14px;border:1px solid var(--line);
+    border-radius:13px;background:#fbfcff;cursor:pointer;transition:.18s;
+  }
+  .opt:hover{border-color:#c0d3ff;background:#f6f9ff}
+  .opt input{margin-top:2px;width:16px;height:16px;accent-color:#3b6ef6;flex:0 0 16px;cursor:pointer}
+  .opt strong{display:block;font-size:12.8px;font-weight:700;color:var(--ink);margin-bottom:2px}
+  .opt small{font-size:11.4px;color:var(--muted);line-height:1.4}
+
+  .overlay{
+    position:fixed;inset:0;background:rgba(10,17,32,.5);backdrop-filter:blur(2px);z-index:55;display:none;
+  }
+  .overlay.on{display:block}
+
+  @media(max-width:1024px){
+    .sidebar{transform:translateX(-100%);width:264px!important}
+    .sidebar.open{transform:none;box-shadow:0 0 80px rgba(0,0,0,.5)}
+    .app.collapsed .sidebar{width:264px}
+    .main{margin-left:0!important}
+    .menu-btn{display:grid}
+    .app.collapsed .brand-text,
+    .app.collapsed .nav-label,
+    .app.collapsed .nav-item span,
+    .app.collapsed .engine-pill span{display:initial}
+    .app.collapsed .nav-item{justify-content:flex-start;padding:10px 13px}
+    .app.collapsed .brand{justify-content:flex-start;padding:20px 18px 18px}
+    .hero{grid-template-columns:1fr;padding:26px 22px}
+    .hero-art{display:none}
+    .collapse-btn{display:none}
+  }
+  @media(max-width:640px){
+    .page{padding:16px 14px 60px}
+    .topbar{padding:10px 14px}
+    .hero h1{font-size:22px}
+    .stat-value{font-size:22px}
+    .chip{display:none}
+    .toasts{left:14px;right:14px;bottom:14px;max-width:none}
+    .msg{max-width:96%}
+  }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logo"><i data-lucide="brain-circuit"></i></div>
+      <div class="brand-text">
+        <strong>DataMind AI</strong>
+        <span>Ask your data.</span>
+      </div>
+      <button class="collapse-btn" id="collapseBtn" title="Collapse sidebar"><i data-lucide="panel-left-close"></i></button>
+    </div>
+
+    <nav class="nav">
+      <p class="nav-label">Workspace</p>
+      <div class="nav-item active" data-view="dashboard"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></div>
+      <div class="nav-item" data-view="upload"><i data-lucide="upload-cloud"></i><span>Upload Dataset</span></div>
+      <div class="nav-item" data-view="overview"><i data-lucide="table-2"></i><span>Data Overview</span></div>
+
+      <p class="nav-label">Intelligence</p>
+      <div class="nav-item" data-view="chat"><i data-lucide="message-square"></i><span>AI Data Chat</span><span class="badge">AI</span></div>
+      <div class="nav-item" data-view="sql"><i data-lucide="terminal"></i><span>SQL Generator</span></div>
+      <div class="nav-item" data-view="viz"><i data-lucide="bar-chart-3"></i><span>Visualizations</span></div>
+      <div class="nav-item" data-view="insights"><i data-lucide="sparkles"></i><span>AI Insights</span></div>
+      <div class="nav-item" data-view="ml"><i data-lucide="brain-circuit"></i><span>Machine Learning</span><span class="badge">ML</span></div>
+
+      <p class="nav-label">Tools</p>
+      <div class="nav-item" data-view="cleaning"><i data-lucide="wand-2"></i><span>Data Cleaning</span></div>
+      <div class="nav-item" data-view="reports"><i data-lucide="file-text"></i><span>Reports</span></div>
+      <div class="nav-item" data-view="settings"><i data-lucide="settings"></i><span>Settings</span></div>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="engine-pill">
+        <span class="dot"></span>
+        <span>Hybrid analytics engine</span>
+      </div>
+    </div>
+  </aside>
+  <div class="overlay" id="overlay"></div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn"><i data-lucide="menu"></i></button>
+      <div class="crumb">
+        <h2 id="pageTitle">Dashboard</h2>
+        <span id="pageSub">Welcome back to your analytics workspace</span>
+      </div>
+      <div class="top-actions">
+        <div class="chip" id="datasetChip"><i data-lucide="database"></i><span>No dataset</span></div>
+        <button class="icon-btn" id="topSample" title="Load sample dataset"><i data-lucide="sparkles"></i></button>
+        <button class="icon-btn" id="bellBtn" title="Notifications"><i data-lucide="bell"></i></button>
+        <div class="avatar">DM</div>
+      </div>
+    </header>
+
+    <div class="page" id="page">
+
+      <!-- ========== DASHBOARD ========== -->
+      <section class="view active" id="view-dashboard">
+        <div class="hero">
+          <div class="hero-text">
+            <div class="pill"><i data-lucide="sparkles"></i> AI-Powered Analytics Workspace</div>
+            <h1>Ask Your Data.<br><span class="grad">Get Intelligent Answers.</span></h1>
+            <p id="heroSub">Upload a CSV or Excel file to unlock automatic profiling, natural language chat, SQL generation, live charts, insights, cleaning and downloadable reports.</p>
+            <div class="hero-actions">
+              <button class="btn btn-white" data-goto="upload"><i data-lucide="upload-cloud"></i> Upload Dataset</button>
+              <button class="btn btn-ghost" id="heroSample"><i data-lucide="database"></i> Load Sample Data</button>
+            </div>
+          </div>
+          <div class="hero-art">
+            <div class="art-card" id="artCard">
+              <div class="art-row"><i data-lucide="activity" style="width:13px;height:13px"></i><span>Waiting for data</span></div>
+              <div class="art-row"><div class="art-bar"><i style="width:14%"></i></div></div>
+              <div class="art-row"><div class="art-bar"><i style="width:8%"></i></div></div>
+              <div class="art-row"><div class="art-bar"><i style="width:10%"></i></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-grid" id="dashStats"></div>
+
+        <div class="grid-2">
+          <div class="card pad">
+            <div class="card-head">
+              <h3>Dataset Preview</h3>
+              <span class="chip" id="previewChip">—</span>
+            </div>
+            <div id="dashPreview"></div>
+          </div>
+          <div class="card pad">
+            <div class="card-head">
+              <h3>Quick Chart</h3>
+              <button class="link-btn" data-goto="viz">Open Visualizations →</button>
+            </div>
+            <div class="chart-box sm"><canvas id="dashChart"></canvas></div>
+            <p class="hint" id="dashChartHint">Charts appear once a dataset is loaded.</p>
+          </div>
+        </div>
+
+        <div class="grid-2-eq">
+          <div class="card pad">
+            <div class="card-head"><h3>Quick Actions</h3><span class="sub">Jump into a workflow</span></div>
+            <div class="qa-grid" id="quickActions"></div>
+          </div>
+          <div class="card pad">
+            <div class="card-head"><h3>Recent Activity</h3><button class="link-btn" id="clearActivity">Clear</button></div>
+            <ul class="activity" id="activityList"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== UPLOAD ========== -->
+      <section class="view" id="view-upload">
+        <div class="section-title">Smart Dataset Upload</div>
+        <div class="section-sub">Upload a CSV or Excel file — DataMind AI validates, parses and profiles it instantly.</div>
+
+        <div class="card pad">
+          <div class="dropzone" id="dropzone">
+            <div class="dz-ico"><i data-lucide="upload-cloud"></i></div>
+            <h4>Drag &amp; drop your file here</h4>
+            <p>Supports .csv, .xlsx and .xls · Maximum file size 10 MB</p>
+            <div class="row" style="justify-content:center">
+              <button class="btn btn-primary" id="browseBtn"><i data-lucide="folder-open"></i> Browse Files</button>
+              <button class="btn btn-outline" id="sampleBtn"><i data-lucide="database"></i> Use Sample Dataset</button>
+            </div>
+            <input type="file" id="fileInput" accept=".csv,.xlsx,.xls,.txt" hidden />
+          </div>
+
+          <div class="row mt18" style="gap:18px">
+            <div class="row" style="gap:7px;font-size:12.3px;color:var(--muted)"><i data-lucide="shield-check" style="width:15px;height:15px;color:#10b981"></i> Parsed in browser; backend sync is optional</div>
+            <div class="row" style="gap:7px;font-size:12.3px;color:var(--muted)"><i data-lucide="file-check-2" style="width:15px;height:15px;color:#10b981"></i> Original data never overwritten</div>
+            <div class="row" style="gap:7px;font-size:12.3px;color:var(--muted)"><i data-lucide="zap" style="width:15px;height:15px;color:#10b981"></i> Instant profiling with real statistics</div>
+          </div>
+        </div>
+
+        <div class="card pad mt18" id="fileInfoCard">
+          <div class="card-head"><h3>Loaded File</h3><span class="chip" id="fileStatusChip">No file</span></div>
+          <div id="fileInfo"></div>
+        </div>
+      </section>
+
+      <!-- ========== OVERVIEW ========== -->
+      <section class="view" id="view-overview">
+        <div class="section-title">Data Overview &amp; Automatic Profiling</div>
+        <div class="section-sub">Every statistic below is calculated from your actual uploaded data.</div>
+        <div id="overviewBody"></div>
+      </section>
+
+      <!-- ========== CHAT ========== -->
+      <section class="view" id="view-chat">
+        <div class="section-title">AI Data Chat</div>
+        <div class="section-sub">Ask questions in plain English. Answers are computed from your real dataset.</div>
+        <div class="card" style="overflow:hidden">
+          <div class="chat-shell">
+            <div class="chat-body" id="chatBody"></div>
+            <div class="sugg" id="chatSugg"></div>
+            <div class="chat-input-bar">
+              <textarea class="chat-input" id="chatInput" rows="1" placeholder="Ask something like: Which product has the highest sales?"></textarea>
+              <button class="btn btn-primary" id="chatSend"><i data-lucide="send"></i> Send</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SQL ========== -->
+      <section class="view" id="view-sql">
+        <div class="section-title">AI-to-SQL Generator</div>
+        <div class="section-sub">Convert English into validated, read-only SQL and execute it against your dataset.</div>
+
+        <div class="card pad">
+          <div class="field" style="margin-bottom:14px">
+            <label for="sqlQuestion">Your question</label>
+            <div class="row" style="gap:10px;flex-wrap:nowrap">
+              <input type="text" id="sqlQuestion" placeholder="e.g. What are the total sales by region?" style="flex:1" />
+              <button class="btn btn-primary" id="sqlGenerate"><i data-lucide="wand-sparkles"></i> Generate</button>
+            </div>
+          </div>
+          <div class="row" style="gap:8px;margin-bottom:16px" id="sqlSugg"></div>
+
+          <div class="sql-out" id="sqlOutput"><span style="color:#62789c">// Generated SQL will appear here…</span></div>
+
+          <div style="margin-top:14px" class="row">
+            <button class="btn btn-primary btn-sm" id="sqlRun"><i data-lucide="play"></i> Execute Query</button>
+            <button class="btn btn-outline btn-sm" id="sqlEditToggle"><i data-lucide="pen-line"></i> Edit SQL</button>
+            <button class="btn btn-outline btn-sm" id="sqlClear"><i data-lucide="eraser"></i> Clear</button>
+            <span class="chip" id="sqlSafety" style="margin-left:auto"><i data-lucide="shield-check"></i><span>Read-only mode</span></span>
+          </div>
+
+          <div id="sqlExplain" class="card" style="margin-top:14px;padding:14px 16px;background:#f8faff;border-color:#e4ecfb;display:none">
+            <div class="row" style="gap:8px;margin-bottom:6px;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#5b6b85">
+              <i data-lucide="info" style="width:14px;height:14px"></i> Plain English Explanation
+            </div>
+            <p id="sqlExplainText" style="margin:0;font-size:13px;color:#3c4d68"></p>
+          </div>
+
+          <div class="card-head" style="margin-top:20px;margin-bottom:12px"><h3>Query Result</h3><span class="chip" id="sqlRowCount">—</span></div>
+          <div id="sqlResult"></div>
+        </div>
+      </section>
+
+      <!-- ========== VIZ ========== -->
+      <section class="view" id="view-viz">
+        <div class="section-title">Automatic Data Visualization</div>
+        <div class="section-sub">Charts are rendered from your actual data — switch type, axes and aggregation.</div>
+
+        <div class="card pad">
+          <div class="form-grid">
+            <div class="field"><label>Chart Type</label>
+              <select id="vizType"><option value="bar">Bar</option><option value="line">Line</option><option value="doughnut">Pie / Doughnut</option></select>
+            </div>
+            <div class="field"><label>Category (X axis)</label><select id="vizX"></select></div>
+            <div class="field"><label>Value (Y axis)</label><select id="vizY"></select></div>
+            <div class="field"><label>Aggregation</label>
+              <select id="vizAgg"><option value="SUM">Sum</option><option value="AVG">Average</option><option value="COUNT">Count</option><option value="MAX">Maximum</option><option value="MIN">Minimum</option></select>
+            </div>
+          </div>
+          <div class="row mt18">
+            <button class="btn btn-primary btn-sm" id="vizRefresh"><i data-lucide="refresh-cw"></i> Refresh Chart</button>
+            <button class="btn btn-outline btn-sm" id="vizAuto"><i data-lucide="sparkles"></i> Auto-suggest</button>
+            <button class="btn btn-outline btn-sm" id="vizDownload"><i data-lucide="download"></i> Download PNG</button>
+          </div>
+        </div>
+
+        <div class="card pad mt18">
+          <div class="card-head"><h3 id="vizTitle">Chart</h3><span class="chip" id="vizMeta">—</span></div>
+          <div class="chart-box" style="height:360px"><canvas id="mainChart"></canvas></div>
+          <p class="hint" id="vizHint">Load a dataset to render charts.</p>
+        </div>
+      </section>
+
+      <!-- ========== INSIGHTS ========== -->
+      <section class="view" id="view-insights">
+        <div class="section-title">AI Insights Generator</div>
+        <div class="section-sub">Facts are computed with statistics; interpretations are clearly labelled.</div>
+        <div class="row" style="margin-bottom:18px">
+          <button class="btn btn-primary btn-sm" id="insightsRefresh"><i data-lucide="refresh-cw"></i> Regenerate Insights</button>
+          <span class="chip" id="insightsCount">0 insights</span>
+        </div>
+        <div id="insightsBody"></div>
+      </section>
+
+      <!-- ========== MACHINE LEARNING ========== -->
+      <section class="view" id="view-ml">
+        <div class="section-title">Machine Learning Lab</div>
+        <div class="section-sub">Train models on your uploaded dataset. Results are evaluated on held-out rows and should be reviewed before business decisions.</div>
+        <div class="card pad">
+          <div class="card-head"><h3>1. Sales / Numeric Prediction</h3><span class="chip">Random Forest Regression</span></div>
+          <p class="hint">Select a numeric target such as Sales or Revenue. The model learns from other columns and reports hold-out accuracy; this is not a guaranteed future forecast.</p>
+          <div class="grid-2-eq"><div class="field"><label for="mlTarget">Target column</label><select id="mlTarget"></select></div><div class="field"><label for="mlPredictFeatures">Input features (optional; choose multiple)</label><select id="mlPredictFeatures" multiple size="4"></select></div></div>
+          <button class="btn btn-primary btn-sm mt18" id="mlPredict"><i data-lucide="trending-up"></i> Train &amp; Evaluate Prediction Model</button>
+          <div id="mlPredictResult" class="mt18"></div>
+        </div>
+        <div class="card pad mt18">
+          <div class="card-head"><h3>2. Anomaly Detection</h3><span class="chip">Isolation Forest</span></div>
+          <p class="hint">Find unusual records from selected numeric columns. An anomaly is a review flag, not proof of fraud or an error.</p>
+          <div class="field"><label for="mlAnomalyFeatures">Numeric features (choose multiple)</label><select id="mlAnomalyFeatures" multiple size="4"></select></div>
+          <button class="btn btn-primary btn-sm mt18" id="mlAnomalies"><i data-lucide="scan-search"></i> Detect Anomalies</button>
+          <div id="mlAnomalyResult" class="mt18"></div>
+        </div>
+        <div class="card pad mt18">
+          <div class="card-head"><h3>3. Customer / Record Segmentation</h3><span class="chip">K-Means Clustering</span></div>
+          <p class="hint">Group records by similarity across at least two numeric features. If customer-level data is not present, groups represent rows rather than identified customers.</p>
+          <div class="grid-2-eq"><div class="field"><label for="mlSegmentFeatures">Numeric features (choose multiple)</label><select id="mlSegmentFeatures" multiple size="4"></select></div><div class="field"><label for="mlClusterCount">Number of clusters</label><select id="mlClusterCount"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select></div></div>
+          <button class="btn btn-primary btn-sm mt18" id="mlSegments"><i data-lucide="users"></i> Create Segments</button>
+          <div id="mlSegmentResult" class="mt18"></div>
+        </div>
+        <div class="hint mt18" id="mlBackendNote">Machine-learning features require the Flask backend and scikit-learn.</div>
+      </section>
+
+      <!-- ========== CLEANING ========== -->
+      <section class="view" id="view-cleaning">
+        <div class="section-title">Smart Data Cleaning</div>
+        <div class="section-sub">Apply fixes to a separate cleaned copy. Your original dataset is never modified.</div>
+        <div id="cleaningBody"></div>
+      </section>
+
+      <!-- ========== REPORTS ========== -->
+      <section class="view" id="view-reports">
+        <div class="section-title">Downloadable Reports</div>
+        <div class="section-sub">Export a real PDF or Excel workbook generated from your current analysis.</div>
+        <div id="reportsBody"></div>
+      </section>
+
+      <!-- ========== SETTINGS ========== -->
+      <section class="view" id="view-settings">
+        <div class="section-title">Settings</div>
+        <div class="section-sub">Workspace, engine and dataset configuration.</div>
+        <div id="settingsBody"></div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<div class="loader-mask" id="loaderMask">
+  <div class="loader-card">
+    <div class="spinner"></div>
+    <p id="loaderText">Processing…</p>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   DataMind AI — hybrid analytics and machine-learning engine
+   ===================================================================== */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+const TITLES = {
+  dashboard: ['Dashboard', 'Welcome back to your analytics workspace'],
+  upload:    ['Upload Dataset', 'Import a CSV or Excel file to get started'],
+  overview:  ['Data Overview', 'Automatic profiling of every column'],
+  chat:      ['AI Data Chat', 'Natural language questions, computed answers'],
+  sql:       ['SQL Generator', 'English → validated read-only SQL'],
+  viz:       ['Visualizations', 'Live charts built from your real data'],
+  insights:  ['AI Insights', 'Patterns, extremes and data quality findings'],
+  ml:        ['Machine Learning', 'Predictive models, anomaly detection and clustering'],
+  cleaning:  ['Data Cleaning', 'Fix quality issues on a separate copy'],
+  reports:   ['Reports', 'Export PDF and Excel deliverables'],
+  settings:  ['Settings', 'Application and dataset configuration']
+};
+
+const state = {
+  view: 'dashboard',
+  dataset: null,     // {name,size,rows,columns,profile,at,isSample}
+  cleaned: null,     // {rows,summary,at}
+  useCleaned: false,
+  chat: [],
+  activity: [],
+  previewPage: 0,
+  charts: {},
+  lastSQL: null,
+  lastResult: null,
+  insights: [],
+  backendConnected: false
+};
+
+/* Backend connection: set window.DATAMIND_API_URL or configure it in Settings. */
+const API_SESSION_KEY = 'datamind_api_session_v1';
+function apiBase(){
+  try {
+    const saved = localStorage.getItem('datamind_api_url');
+    if (saved) return saved.replace(/\/$/, '');
+  } catch(e){}
+  if (window.DATAMIND_API_URL) return String(window.DATAMIND_API_URL).replace(/\/$/, '');
+  if (['localhost','127.0.0.1'].includes(location.hostname)) return 'http://127.0.0.1:5000';
+  return location.origin;
+}
+let apiSession = null;
+let backendSyncPromise = Promise.resolve();
+try { apiSession = localStorage.getItem(API_SESSION_KEY); } catch(e){}
+async function ensureApiSession(){
+  if (apiSession) return apiSession;
+  const response = await fetch(apiBase() + '/api/session', {method:'POST', headers:{'Content-Type':'application/json'}});
+  if (!response.ok) throw new Error('Backend session could not be created (' + response.status + ').');
+  const data = await response.json();
+  apiSession = data.session_id;
+  try { localStorage.setItem(API_SESSION_KEY, apiSession); } catch(e){}
+  return apiSession;
+}
+async function apiRequest(path, body, method='POST'){
+  if (!path.startsWith('/api/dataset')) await backendSyncPromise;
+  for (let attempt=0; attempt<2; attempt++){
+    const sid = await ensureApiSession();
+    const opts = {method, headers:{'X-Session-Id':sid}};
+    if (body !== undefined){ opts.headers['Content-Type']='application/json'; opts.body=JSON.stringify(body); }
+    const response = await fetch(apiBase() + path, opts);
+    const data = await response.json().catch(()=>({error:'Invalid response from backend.'}));
+    if (response.ok) return data;
+    if (response.status===401 && attempt===0){
+      apiSession=null; try{localStorage.removeItem(API_SESSION_KEY);}catch(e){}
+      const fresh=await ensureApiSession();
+      if (state.dataset && path!=='/api/dataset'){
+        const syncResponse=await fetch(apiBase()+'/api/dataset',{method:'POST',headers:{'Content-Type':'application/json','X-Session-Id':fresh},body:JSON.stringify({name:state.dataset.name,size:state.dataset.size,columns:state.dataset.columns.map(c=>c.name),rows:state.dataset.rows})});
+        if(!syncResponse.ok) throw new Error('Backend session was refreshed, but dataset sync failed. Reload the dataset and try again.');
+        if(state.cleaned && state.cleaned.rows && state.cleaned.columns){
+          const cleanResponse=await fetch(apiBase()+'/api/dataset/cleaned',{method:'POST',headers:{'Content-Type':'application/json','X-Session-Id':fresh},body:JSON.stringify({columns:state.cleaned.columns.map(c=>c.name),rows:state.cleaned.rows})});
+          if(!cleanResponse.ok) throw new Error('Backend session was refreshed, but the cleaned copy could not be synced.');
+        }
+      }
+      continue;
+    }
+    throw new Error(data.error || ('Backend request failed (' + response.status + ').'));
+  }
+  throw new Error('Backend session could not be refreshed.');
+}
+async function syncBackendDataset(dataset){
+  const previous=backendSyncPromise.catch(()=>{});
+  const task=previous.then(async()=>{
+    try {
+      await apiRequest('/api/dataset', {name:dataset.name, size:dataset.size, columns:dataset.columns.map(c=>c.name), rows:dataset.rows});
+      if (state.cleaned && state.cleaned.rows && state.cleaned.columns){
+        await apiRequest('/api/dataset/cleaned', {columns:state.cleaned.columns.map(c=>c.name), rows:state.cleaned.rows});
+      }
+      state.backendConnected = true;
+      const note = document.getElementById('mlBackendNote');
+      if (note) note.textContent = 'Connected to Flask backend. Machine-learning models are ready.';
+    } catch(err){
+      state.backendConnected = false;
+      console.warn('Backend sync unavailable; local analytics remains active:', err.message);
+      const note = document.getElementById('mlBackendNote');
+      if (note) note.textContent = 'Backend not connected: ' + err.message + ' Start backend/app.py and configure its URL to use machine-learning features.';
+    }
+  });
+  backendSyncPromise=task;
+  await task;
+}
+
+/* ---------------- utilities ---------------- */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const isNil = v => v === null || v === undefined || v === '';
+function fmtNum(n, dp = 2){
+  if (n === null || n === undefined || Number.isNaN(n)) return '—';
+  if (typeof n !== 'number') return String(n);
+  const abs = Math.abs(n);
+  if (Number.isInteger(n)) return n.toLocaleString();
+  if (abs >= 1000) return n.toLocaleString(undefined, {maximumFractionDigits: dp, minimumFractionDigits: 0});
+  return n.toLocaleString(undefined, {maximumFractionDigits: 4});
+}
+const fmtAny = v => typeof v === 'number' ? fmtNum(v) : esc(v ?? '—');
+function icons(){ try { if (window.lucide) lucide.createIcons(); } catch(e){} }
+function toast(msg, type = 'info'){
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  const ic = type === 'ok' ? 'check-circle-2' : type === 'err' ? 'alert-circle' : 'info';
+  el.innerHTML = '<i data-lucide="' + ic + '"></i><div>' + esc(msg) + '</div>';
+  $('#toasts').appendChild(el);
+  icons();
+  setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(20px)'; el.style.transition = '.3s'; setTimeout(() => el.remove(), 320); }, 3400);
+}
+function loading(on, text){
+  $('#loaderText').textContent = text || 'Processing…';
+  $('#loaderMask').classList.toggle('on', !!on);
+}
+function logActivity(icon, text){
+  state.activity.unshift({icon, text, time: new Date()});
+  state.activity = state.activity.slice(0, 12);
+  renderActivity();
+}
+function gone(n){ return n; }
+
+/* =====================================================================
+   DATA ENGINE
+   ===================================================================== */
+function inferColumns(rows, headers){
+  return headers.map(h => {
+    const vals = rows.map(r => r[h]).filter(v => !isNil(v) && String(v).trim() !== '');
+    let numeric = 0, dateish = 0;
+    vals.forEach(v => {
+      const s = String(v).trim();
+      if (s !== '' && !isNaN(Number(s.replace(/[,$%\s]/g, '')))) numeric++;
+      if (/^\d{4}-\d{2}-\d{2}/.test(s) || /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(s)) dateish++;
+    });
+    let type = 'string';
+    if (vals.length && numeric / vals.length > 0.85) type = 'number';
+    else if (vals.length && dateish / vals.length > 0.85) type = 'date';
+    return {name: h, type};
+  });
+}
+
+function profileData(rows, columns){
+  const n = rows.length;
+  const cols = columns.map(c => {
+    const vals = rows.map(r => r[c.name]);
+    const nonEmpty = vals.filter(v => !isNil(v) && String(v).trim() !== '');
+    const missing = n - nonEmpty.length;
+    const unique = new Set(nonEmpty.map(v => String(v))).size;
+    const out = {name: c.name, type: c.type, missing, unique, count: nonEmpty.length, empty: nonEmpty.length === 0};
+    if (c.type === 'number'){
+      const nums = nonEmpty.map(v => Number(String(v).replace(/[,$%\s]/g, ''))).filter(v => !Number.isNaN(v));
+      const sum = nums.reduce((a, b) => a + b, 0);
+      const mean = nums.length ? sum / nums.length : null;
+      const sorted = [...nums].sort((a, b) => a - b);
+      const median = sorted.length ? (sorted.length % 2 ? sorted[(sorted.length - 1) / 2] : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2) : null;
+      const std = nums.length ? Math.sqrt(nums.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / nums.length) : null;
+      Object.assign(out, {min: sorted[0] ?? null, max: sorted[sorted.length - 1] ?? null, mean, median, std, sum});
+    } else {
+      const counts = {};
+      nonEmpty.forEach(v => { const k = String(v); counts[k] = (counts[k] || 0) + 1; });
+      const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+      out.top = top ? {value: top[0], count: top[1]} : null;
+      out.values = Object.keys(counts).slice(0, 400);
+    }
+    return out;
+  });
+  const seen = new Set(); let dup = 0;
+  rows.forEach(r => { const k = JSON.stringify(r); if (seen.has(k)) dup++; else seen.add(k); });
+  const totalMissing = cols.reduce((a, c) => a + c.missing, 0);
+  return {rowCount: n, colCount: cols.length, cols, duplicates: dup, totalMissing};
+}
+
+function normalizeRows(rawRows, columns){
+  return rawRows.map(r => {
+    const o = {};
+    columns.forEach(c => {
+      let v = r[c.name];
+      if (isNil(v) || String(v).trim() === ''){ o[c.name] = null; return; }
+      if (c.type === 'number'){
+        const n = Number(String(v).replace(/[,$%\s]/g, ''));
+        o[c.name] = Number.isNaN(n) ? null : n;
+      } else {
+        o[c.name] = String(v);
+      }
+    });
+    return o;
+  }).filter(o => Object.values(o).some(v => v !== null && v !== ''));
+}
+
+const STORAGE_KEY = 'datamind_dataset_v1';
+function persistState(){
+  if (!state.dataset){ try { localStorage.removeItem(STORAGE_KEY); } catch(e){} return; }
+  try {
+    const payload = {dataset: state.dataset, cleaned: state.cleaned, useCleaned: state.useCleaned, chat: state.chat};
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  } catch(e){ console.warn('persist failed', e); }
+}
+function restoreState(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const p = JSON.parse(raw);
+    if (!p || !p.dataset) return false;
+    state.dataset = p.dataset;
+    if (state.dataset.at) state.dataset.at = new Date(state.dataset.at);
+    state.cleaned = p.cleaned || null;
+    if (state.cleaned && state.cleaned.at) state.cleaned.at = new Date(state.cleaned.at);
+    state.useCleaned = !!p.useCleaned;
+    state.chat = Array.isArray(p.chat) ? p.chat : [];
+    return true;
+  } catch(e){ try { localStorage.removeItem(STORAGE_KEY); } catch(_){} return false; }
+}
+
+function loadDataset(name, size, rawRows, headers, isSample){
+  if (!headers || !headers.length){ toast('Could not detect any columns in this file.', 'err'); return; }
+  const columns = inferColumns(rawRows, headers);
+  const rows = normalizeRows(rawRows, columns);
+  if (!rows.length){ toast('The file contains no usable rows.', 'err'); return; }
+
+  state.dataset = {
+    name, size: size || 0, rows, columns,
+    profile: profileData(rows, columns),
+    at: new Date(), isSample: !!isSample
+  };
+  state.cleaned = null;
+  state.useCleaned = false;
+  state.previewPage = 0;
+  state.chat = [];
+  state.lastSQL = null;
+  state.lastResult = null;
+  state.insights = [];
+
+  logActivity('upload-cloud', 'Loaded dataset "' + name + '" with ' + rows.length + ' rows.');
+  toast('Dataset loaded: ' + rows.length + ' rows × ' + columns.length + ' columns', 'ok');
+  renderAll();
+  showView('overview');
+  persistState();
+  syncBackendDataset(state.dataset);
+}
+
+function getColumns(){
+  if (!state.dataset) return [];
+  if (state.useCleaned && state.cleaned && state.cleaned.columns) return state.cleaned.columns;
+  return state.dataset.columns;
+}
+function getRows(){
+  if (!state.dataset) return [];
+  if (state.useCleaned && state.cleaned) return state.cleaned.rows;
+  return state.dataset.rows;
+}
+function getProfile(){
+  if (!state.dataset) return null;
+  if (state.useCleaned && state.cleaned) return profileData(state.cleaned.rows, getColumns());
+  return state.dataset.profile;
+}
+function numericCols(){ const p = getProfile(); return p ? p.cols.filter(c => c.type === 'number').map(c => c.name) : []; }
+function categoryCols(){ const p = getProfile(); return p ? p.cols.filter(c => c.type !== 'number').map(c => c.name) : []; }
+
+function primaryMetric(){
+  const nums = numericCols();
+  const pref = ['sales','revenue','amount','profit','total','value','price','salary','units','quantity','score','cost'];
+  for (const p of pref){ const f = nums.find(n => n.toLowerCase().includes(p)); if (f) return f; }
+  return nums[0] || null;
+}
+function primaryDimension(){
+  if (!state.dataset) return null;
+  const prof = state.dataset.profile;
+  const cats = prof.cols.filter(c => c.type !== 'number' && c.type !== 'date');
+  const pref = ['category','product','region','customer','department','city','country','segment','type','status','name','team'];
+  for (const p of pref){
+    const f = cats.find(c => c.name.toLowerCase().includes(p) && c.unique >= 2 && c.unique <= Math.max(30, prof.rowCount * 0.7));
+    if (f) return f.name;
+  }
+  const f = cats.find(c => c.unique >= 2 && c.unique <= 20);
+  return f ? f.name : (cats[0] ? cats[0].name : null);
+}
+
+/* ---------------- aggregation ---------------- */
+function aggregate(xCol, yCol, agg){
+  const rows = getRows();
+  const map = new Map();
+  rows.forEach(r => {
+    const k = isNil(r[xCol]) ? '(empty)' : String(r[xCol]);
+    if (!map.has(k)) map.set(k, []);
+    map.get(k).push(r);
+  });
+  const out = [];
+  for (const [k, grp] of map){
+    let v;
+    if (agg === 'COUNT') v = grp.length;
+    else {
+      const nums = grp.map(r => r[yCol]).filter(n => typeof n === 'number' && !Number.isNaN(n));
+      if (!nums.length){ v = 0; }
+      else if (agg === 'SUM') v = nums.reduce((a, b) => a + b, 0);
+      else if (agg === 'AVG') v = nums.reduce((a, b) => a + b, 0) / nums.length;
+      else if (agg === 'MAX') v = Math.max(...nums);
+      else if (agg === 'MIN') v = Math.min(...nums);
+      else v = nums.length;
+    }
+    out.push({label: k, value: v});
+  }
+  out.sort((a, b) => b.value - a.value);
+  return out;
+}
+
+/* =====================================================================
+   SQL ENGINE (safe read-only subset)
+   ===================================================================== */
+const FORBIDDEN = /\b(insert|update|delete|drop|alter|create|attach|detach|pragma|replace|truncate|grant|revoke|vacuum|exec|execute|xp_|load_extension|into\s+outfile)\b/i;
+
+function stripIdentQuotes(sql){
+  return sql.split("'").map((p, i) => i % 2 === 0 ? p.replace(/["`\[\]]/g, '') : p).join("'");
+}
+function validateSQL(sql){
+  const s = stripIdentQuotes(String(sql || '')).trim();
+  if (!s) throw new Error('Query is empty.');
+  if (!/^select\b/i.test(s)) throw new Error('Only SELECT queries are allowed.');
+  const body = s.replace(/;\s*$/, '');
+  if (body.includes(';')) throw new Error('Multiple statements are not allowed.');
+  if (FORBIDDEN.test(body)) throw new Error('Query contains a forbidden keyword. Only read-only SELECT statements are permitted.');
+  return body;
+}
+function splitTopLevel(str, sep){
+  const parts = []; let depth = 0, cur = '';
+  for (const ch of str){
+    if (ch === '(') depth++;
+    if (ch === ')') depth--;
+    if (ch === sep && depth === 0){ parts.push(cur); cur = ''; } else cur += ch;
+  }
+  parts.push(cur);
+  return parts.map(p => p.trim()).filter(Boolean);
+}
+function parseSelectItem(item){
+  item = item.trim();
+  let alias = null;
+  const asM = item.match(/\s+as\s+([\w\s]+)$/i);
+  if (asM){ alias = asM[1].trim(); item = item.slice(0, asM.index).trim(); }
+  const aggM = item.match(/^(count|sum|avg|min|max)\s*\(\s*(distinct\s+)?(\*|[\w\s]+?)\s*\)$/i);
+  if (aggM){
+    const fn = aggM[1].toUpperCase();
+    const distinct = !!aggM[2];
+    const col = aggM[3] === '*' ? null : aggM[3].trim();
+    return {kind: 'agg', fn, distinct, col, alias: alias || (fn.toLowerCase() + '_' + (col || 'rows'))};
+  }
+  if (item === '*') return {kind: 'star'};
+  return {kind: 'col', col: item, alias: alias || item};
+}
+function parseWhere(str){
+  return str.split(/\s+and\s+/i).map(part => {
+    const m = part.trim().match(/^([\w\s]+?)\s*(>=|<=|!=|<>|=|>|<|like)\s*(.+)$/i);
+    if (!m) throw new Error('Unsupported WHERE condition: "' + part.trim() + '"');
+    let val = m[3].trim();
+    let quoted = false;
+    if ((val.startsWith("'") && val.endsWith("'")) || (val.startsWith('"') && val.endsWith('"'))){
+      val = val.slice(1, -1); quoted = true;
+    }
+    return {col: m[1].trim(), op: m[2].toLowerCase(), value: val, quoted};
+  });
+}
+function evalWhere(row, conds){
+  return conds.every(c => {
+    const cell = row[c.col];
+    const op = c.op;
+    if (op === 'like'){
+      const rx = new RegExp('^' + c.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/%/g, '.*').replace(/_/g, '.') + '$', 'i');
+      return rx.test(String(cell ?? ''));
+    }
+    const numVal = Number(c.value);
+    const numeric = cell !== null && cell !== undefined && !Number.isNaN(Number(cell)) && !Number.isNaN(numVal) && !c.quoted;
+    if (numeric){
+      const a = Number(cell), b = numVal;
+      return op === '=' ? a === b : op === '!=' || op === '<>' ? a !== b
+        : op === '>' ? a > b : op === '<' ? a < b : op === '>=' ? a >= b : a <= b;
+    }
+    const a = String(cell ?? '').toLowerCase(), b = String(c.value).toLowerCase();
+    return op === '=' ? a === b : op === '!=' || op === '<>' ? a !== b
+      : op === '>' ? a > b : op === '<' ? a < b : op === '>=' ? a >= b : a <= b;
+  });
+}
+function computeAgg(item, rows){
+  const vals = item.col === null ? rows : rows.map(r => r[item.col]);
+  if (item.fn === 'COUNT'){
+    if (item.col === null) return rows.length;
+    const nonEmpty = vals.filter(v => !isNil(v) && String(v).trim() !== '');
+    return item.distinct ? new Set(nonEmpty.map(String)).size : nonEmpty.length;
+  }
+  const nums = vals.map(v => Number(v)).filter(v => !Number.isNaN(v));
+  if (!nums.length) return null;
+  if (item.fn === 'SUM') return nums.reduce((a, b) => a + b, 0);
+  if (item.fn === 'AVG') return nums.reduce((a, b) => a + b, 0) / nums.length;
+  if (item.fn === 'MIN') return Math.min(...nums);
+  if (item.fn === 'MAX') return Math.max(...nums);
+  return null;
+}
+
+function runSQL(sql){
+  if (!state.dataset) throw new Error('No dataset loaded. Upload a file first.');
+  const s = validateSQL(sql);
+
+  let rest = s.replace(/^select\s+/i, '').trim();
+  const fromIdx = rest.search(/\s+from\s+/i);
+  if (fromIdx === -1) throw new Error('Query must include a FROM clause.');
+  const selectPart = rest.slice(0, fromIdx).trim();
+  rest = rest.slice(fromIdx).replace(/^\s+from\s+/i, '');
+
+  const clauseRe = /\s+(where|group\s+by|order\s+by|limit)\s+/gi;
+  const positions = [];
+  let m;
+  while ((m = clauseRe.exec(rest)) !== null){
+    positions.push({k: m[1].toLowerCase().replace(/\s+/g, ''), i: m.index, end: clauseRe.lastIndex});
+  }
+  const clause = {from: '', where: null, groupby: null, orderby: null, limit: null};
+  if (!positions.length){
+    clause.from = rest.trim();
+  } else {
+    clause.from = rest.slice(0, positions[0].i).trim();
+    for (let j = 0; j < positions.length; j++){
+      const val = rest.slice(positions[j].end, j + 1 < positions.length ? positions[j + 1].i : rest.length).trim();
+      clause[positions[j].k] = val;
+    }
+  }
+  if (!clause.from) throw new Error('Missing table name after FROM.');
+
+  const known = new Set(state.dataset.columns.map(c => c.name));
+  const items = [];
+  splitTopLevel(selectPart, ',').map(parseSelectItem).forEach(it => {
+    if (it.kind === 'star') state.dataset.columns.forEach(c => items.push({kind: 'col', col: c.name, alias: c.name}));
+    else items.push(it);
+  });
+  items.forEach(it => {
+    if (it.kind === 'col' && !known.has(it.col)) throw new Error('Unknown column: "' + it.col + '". Available: ' + [...known].join(', '));
+    if (it.kind === 'agg' && it.col && !known.has(it.col)) throw new Error('Unknown column: "' + it.col + '".');
+  });
+
+  let data = getRows();
+  if (clause.where) {
+    const conds = parseWhere(clause.where);
+    conds.forEach(c => { if (!known.has(c.col)) throw new Error('Unknown column in WHERE: "' + c.col + '"'); });
+    data = data.filter(r => evalWhere(r, conds));
+  }
+
+  const hasAgg = items.some(i => i.kind === 'agg');
+  const outCols = items.map(i => i.alias);
+  let outRows = [];
+
+  if (clause.groupby && hasAgg){
+    const g = clause.groupby.split(',')[0].trim();
+    if (!known.has(g)) throw new Error('Unknown GROUP BY column: "' + g + '"');
+    const map = new Map();
+    data.forEach(r => {
+      const k = isNil(r[g]) ? '(empty)' : String(r[g]);
+      if (!map.has(k)) map.set(k, []);
+      map.get(k).push(r);
+    });
+    for (const [, grp] of map){
+      outRows.push(items.map(it => {
+        if (it.kind === 'agg') return computeAgg(it, grp);
+        if (it.col === g) return grp[0][g];
+        return grp[0][it.col];
+      }));
+    }
+  } else if (hasAgg){
+    outRows.push(items.map(it => it.kind === 'agg' ? computeAgg(it, data) : (data[0] ? data[0][it.col] : null)));
+  } else {
+    outRows = data.map(r => items.map(it => r[it.col]));
+  }
+
+  if (clause.orderby){
+    const om = clause.orderby.match(/^([\w\s]+?)(?:\s+(asc|desc))?$/i);
+    if (om){
+      const obCol = om[1].trim();
+      const desc = (om[2] || 'ASC').toUpperCase() === 'DESC';
+      let idx = outCols.findIndex(c => c.toLowerCase() === obCol.toLowerCase());
+      if (idx === -1) idx = outCols.findIndex(c => c.toLowerCase() === obCol.toLowerCase().replace(/\s+/g, '_'));
+      if (idx >= 0){
+        outRows.sort((a, b) => {
+          const x = a[idx], y = b[idx];
+          const nx = Number(x), ny = Number(y);
+          const bothNum = x !== null && y !== null && !Number.isNaN(nx) && !Number.isNaN(ny);
+          const cmp = bothNum ? nx - ny : String(x ?? '').localeCompare(String(y ?? ''));
+          return desc ? -cmp : cmp;
+        });
+      }
+    }
+  }
+  if (clause.limit){
+    const lim = parseInt(clause.limit, 10);
+    if (!Number.isNaN(lim)) outRows = outRows.slice(0, lim);
+  }
+  return {columns: outCols, rows: outRows, total: outRows.length};
+}
+
+/* =====================================================================
+   NATURAL LANGUAGE → SQL
+   ===================================================================== */
+const NUM_WORDS = {one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,twenty:20};
+
+function findMentioned(q){
+  if (!state.dataset) return [];
+  const ql = ' ' + q.toLowerCase() + ' ';
+  const found = [];
+  state.dataset.columns.forEach(c => {
+    const name = c.name.toLowerCase();
+    const compact = name.replace(/[\s_-]+/g, '');
+    const words = name.split(/[\s_-]+/).filter(w => w.length > 2);
+    let score = 0;
+    if (ql.includes(name)) score = 3;
+    else if (ql.includes(compact)) score = 2;
+    else if (words.length && words.every(w => ql.includes(w))) score = 2;
+    else if (words.length && words.some(w => w.length > 3 && ql.includes(w))) score = 1;
+    if (score) found.push({name: c.name, type: c.type, score});
+  });
+  return found.sort((a, b) => b.score - a.score);
+}
+
+function extractLimit(q){
+  const d = q.match(/\b(\d{1,3})\b/);
+  if (d) return Math.min(parseInt(d[1], 10), 200);
+  for (const w in NUM_WORDS) if (new RegExp('\\b' + w + '\\b').test(q)) return NUM_WORDS[w];
+  return null;
+}
+
+function generateSQL(question){
+  if (!state.dataset) throw new Error('No dataset loaded. Upload a file to generate SQL.');
+  const q = question.toLowerCase();
+  const mentioned = findMentioned(question);
+  const numMentioned = mentioned.find(c => c.type === 'number');
+  const catMentioned = mentioned.find(c => c.type !== 'number' && c.type !== 'date');
+
+  const metric = numMentioned ? numMentioned.name : primaryMetric();
+  const aggrAvg = /\b(average|avg|mean)\b/.test(q);
+  const aggrCount = /\b(count|how many|number of|how much many)\b/.test(q);
+  const wantsLow = /\b(lowest|least|worst|smallest|minimum|min)\b/.test(q);
+  const wantsHigh = /\b(highest|largest|top|best|most|maximum|max)\b/.test(q);
+  const groupish = /\b(which|per|by|each|across|group|breakdown|compare|distribution|top|highest|lowest|best|worst)\b/.test(q);
+
+  const groupCol = (catMentioned && groupish) ? catMentioned.name
+                  : (groupish && /\b(which|per|by|each|across)\b/.test(q) ? primaryDimension() : null);
+
+  const whereParts = [];
+  if (state.dataset) {
+    state.dataset.profile.cols.forEach(c => {
+      if (c.type === 'number' || !c.values) return;
+      const hit = c.values.find(v => v.length > 1 && v.length < 40 && new RegExp('\\b' + v.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b').test(q));
+      if (hit) whereParts.push(c.name + " = '" + hit.replace(/'/g, "''") + "'");
+    });
+  }
+  const whereSQL = whereParts.length ? '\nWHERE ' + whereParts.join('\n  AND ') : '';
+
+  let sql = '', explanation = '', intent = '';
+
+  if (groupCol && metric && (groupish || aggrAvg || aggrCount)){
+    const useCount = aggrCount && !numMentioned;
+    const fn = useCount ? 'COUNT(*)' : (aggrAvg ? 'AVG(' + metric + ')' : 'SUM(' + metric + ')');
+    const alias = useCount ? 'record_count' : (aggrAvg ? 'average_' + metric : 'total_' + metric);
+    const dir = wantsLow ? 'ASC' : 'DESC';
+    const lim = extractLimit(q) || 10;
+    sql = 'SELECT ' + groupCol + ',\n       ' + fn + ' AS ' + alias +
+          '\nFROM dataset' + whereSQL +
+          '\nGROUP BY ' + groupCol +
+          '\nORDER BY ' + alias + ' ' + dir +
+          '\nLIMIT ' + lim + ';';
+    explanation = 'This groups all rows by "' + groupCol + '", calculates the ' + (useCount ? 'number of records' : (aggrAvg ? 'average' : 'total') + ' of "' + metric + '"') +
+      ' for each group, then sorts ' + (wantsLow ? 'ascending (lowest first)' : 'descending (highest first)') + ' and keeps the top ' + lim + '.';
+    intent = 'group';
+  } else if (metric && (aggrAvg || /\bsum\b|\btotal\b|\boverall\b|\bmax\b|\bmin\b|\bhighest\b|\blowest\b/.test(q))){
+    const fn = aggrAvg ? 'AVG' : wantsLow ? 'MIN' : (/\bmax\b|\bhighest\b/.test(q) && !/\bsum\b|\btotal\b/.test(q)) ? 'MAX' : 'SUM';
+    const alias = fn.toLowerCase() + '_' + metric;
+    sql = 'SELECT ' + fn + '(' + metric + ') AS ' + alias + '\nFROM dataset' + whereSQL + ';';
+    explanation = 'This applies ' + fn + ' to the "' + metric + '" column across ' + (whereSQL ? 'the filtered rows' : 'every row') + ' and returns a single number.';
+    intent = 'scalar';
+  } else if (aggrCount){
+    sql = 'SELECT COUNT(*) AS row_count\nFROM dataset' + whereSQL + ';';
+    explanation = 'This counts how many rows are in the dataset' + (whereSQL ? ' after applying the filter.' : '.');
+    intent = 'count';
+  } else {
+    const lim = extractLimit(q) || 10;
+    sql = 'SELECT *\nFROM dataset' + whereSQL + '\nLIMIT ' + lim + ';';
+    explanation = 'No aggregation was detected, so this returns raw rows (up to ' + lim + ') from the dataset' + (whereSQL ? ' matching the filter.' : '.');
+    intent = 'rows';
+  }
+  return {sql, explanation, intent};
+}
+
+function describeResult(gen, res){
+  if (!res.rows.length) return 'The query returned no rows. Try rephrasing the question or check the filters.';
+  const cols = res.columns;
+  const first = res.rows[0];
+  if (res.rows.length === 1 && cols.length === 1){
+    const v = first[0];
+    return 'The result is <strong>' + fmtAny(v) + '</strong>.';
+  }
+  if (gen.intent === 'group'){
+    const sorted = [...res.rows].sort((a, b) => (Number(b[1]) || 0) - (Number(a[1]) || 0));
+    const top = sorted[0];
+    const bottom = sorted[sorted.length - 1];
+    let txt = 'The highest <strong>' + esc(cols[0]) + '</strong> is <strong>' + esc(top[0]) + '</strong> with <strong>' + fmtAny(top[1]) + '</strong>.';
+    if (sorted.length > 1) txt += ' The lowest is <strong>' + esc(bottom[0]) + '</strong> at <strong>' + fmtAny(bottom[1]) + '</strong>.';
+    txt += ' ' + sorted.length + ' group' + (sorted.length > 1 ? 's' : '') + ' found.';
+    return txt;
+  }
+  if (res.rows.length === 1){
+    return cols.map((c, i) => '<strong>' + esc(c) + '</strong>: ' + fmtAny(first[i])).join(' · ');
+  }
+  return 'Returned <strong>' + res.rows.length + '</strong> rows across ' + cols.length + ' columns. Showing the first ' + Math.min(res.rows.length, 5) + ' below.';
+}
+
+/* =====================================================================
+   SAMPLE DATASET
+   ===================================================================== */
+function makeSampleData(){
+  let seed = 20240613;
+  const rnd = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
+  const pick = arr => arr[Math.floor(rnd() * arr.length)];
+
+  const products = [
+    {n:'Laptop Pro 15', c:'Electronics', p:1250},
+    {n:'Wireless Mouse', c:'Accessories', p:29},
+    {n:'4K Monitor', c:'Electronics', p:410},
+    {n:'Mechanical Keyboard', c:'Accessories', p:95},
+    {n:'Noise-Cancel Headphones', c:'Audio', p:220},
+    {n:'Bluetooth Speaker', c:'Audio', p:85},
+    {n:'USB-C Hub', c:'Accessories', p:45},
+    {n:'Smart Watch', c:'Wearables', p:265},
+    {n:'Tablet Air', c:'Electronics', p:620},
+    {n:'Fitness Band', c:'Wearables', p:75}
+  ];
+  const regions = ['North', 'South', 'East', 'West', 'Central'];
+  const customers = ['Ayesha Khan','Bilal Ahmed','Chen Wei','Daniel Okafor','Elena Petrova','Farah Siddiqui','Gabriel Rossi',
+                     'Hana Suzuki','Ibrahim Yusuf','Jasmine Lee','Karan Mehta','Laila Hassan','Mateo Alvarez','Nadia Karim',
+                     'Omar Farooq','Priya Nair','Quinn Taylor','Rafael Costa','Sara Ibrahim','Tariq Aziz'];
+  const channels = ['Online', 'Retail', 'Partner'];
+
+  const rows = [];
+  const base = new Date(2024, 0, 3);
+  for (let i = 0; i < 180; i++){
+    const prod = pick(products);
+    const units = 1 + Math.floor(rnd() * 12);
+    const unitPrice = prod.p;
+    let sales = units * unitPrice;
+    const region = pick(regions);
+    if (region === 'North') sales = sales * 1.18;
+    if (region === 'Central') sales = sales * 0.92;
+    sales = Math.round(sales * 100) / 100;
+    const margin = 0.08 + rnd() * 0.22;
+    const profit = Math.round(sales * margin * 100) / 100;
+    const d = new Date(base.getTime() + i * 2 * 86400000);
+    rows.push({
+      OrderID: 'ORD-' + (1000 + i),
+      Date: d.toISOString().slice(0, 10),
+      Customer: pick(customers),
+      Product: prod.n,
+      Category: prod.c,
+      Region: region,
+      Channel: pick(channels),
+      Units: units,
+      UnitPrice: unitPrice,
+      Sales: sales,
+      Profit: profit
+    });
+  }
+  return {rows, headers: Object.keys(rows[0])};
+}
+
+/* =====================================================================
+   RENDER: SHARED
+   ===================================================================== */
+function renderStatGrid(target){
+  const p = getProfile();
+  const el = $(target);
+  if (!p){
+    el.innerHTML = ['Total Rows','Total Columns','Missing Values','Duplicate Rows'].map((l, i) => {
+      const tones = ['tone-blue','tone-violet','tone-amber','tone-red'];
+      const ics = ['rows-3','columns-3','alert-triangle','copy'];
+      return '<div class="stat"><div class="stat-top"><div class="stat-ico ' + tones[i] + '"><i data-lucide="' + ics[i] + '"></i></div>' +
+        '<div class="stat-label">' + l + '</div></div><div class="stat-value">—</div>' +
+        '<div class="stat-foot">No dataset loaded</div></div>';
+    }).join('');
+    icons(); return;
+  }
+  const dupes = p.duplicates;
+  const miss = p.totalMissing;
+  el.innerHTML = `
+    <div class="stat"><div class="stat-top"><div class="stat-ico tone-blue"><i data-lucide="rows-3"></i></div><div class="stat-label">Total Rows</div></div>
+      <div class="stat-value">${fmtNum(p.rowCount)}</div><div class="stat-foot">${state.useCleaned ? 'Cleaned copy active' : 'Original dataset'}</div></div>
+    <div class="stat"><div class="stat-top"><div class="stat-ico tone-violet"><i data-lucide="columns-3"></i></div><div class="stat-label">Total Columns</div></div>
+      <div class="stat-value">${p.colCount}</div><div class="stat-foot">${p.cols.filter(c => c.type === 'number').length} numeric · ${p.cols.filter(c => c.type !== 'number').length} categorical</div></div>
+    <div class="stat"><div class="stat-top"><div class="stat-ico tone-amber"><i data-lucide="alert-triangle"></i></div><div class="stat-label">Missing Values</div></div>
+      <div class="stat-value">${fmtNum(miss)}</div><div class="stat-foot">${miss ? (miss / (p.rowCount * p.colCount) * 100).toFixed(1) + '% of all cells' : 'No missing cells'}</div></div>
+    <div class="stat"><div class="stat-top"><div class="stat-ico tone-red"><i data-lucide="copy"></i></div><div class="stat-label">Duplicate Rows</div></div>
+      <div class="stat-value">${fmtNum(dupes)}</div><div class="stat-foot">${dupes ? 'Consider cleaning' : 'No duplicates found'}</div></div>`;
+  icons();
+}
+
+function renderTable(rows, columns, limit){
+  const data = limit ? rows.slice(0, limit) : rows;
+  if (!data.length) return '<div class="empty"><div class="empty-ico"><i data-lucide="inbox"></i></div><h4>No rows to display</h4></div>';
+  const head = columns.map(c => '<th>' + esc(c) + '</th>').join('');
+  const body = data.map(r => '<tr>' + columns.map(c => {
+    const v = r[c];
+    const isNum = typeof v === 'number';
+    return '<td class="' + (isNum ? 'num' : '') + '" title="' + esc(v ?? '') + '">' + (isNil(v) ? '<span style="color:#b6c2d4">null</span>' : fmtAny(v)) + '</td>';
+  }).join('') + '</tr>').join('');
+  return '<div class="table-wrap"><table class="dt"><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table></div>';
+}
+
+function renderPreviewBlock(){
+  const el = $('#dashPreview');
+  if (!state.dataset){
+    el.innerHTML = '<div class="empty"><div class="empty-ico"><i data-lucide="database"></i></div><h4>No dataset loaded</h4><p>Upload a CSV or Excel file, or load the built-in sample dataset to see a live preview.</p><button class="btn btn-primary btn-sm" data-goto="upload"><i data-lucide="upload-cloud"></i> Upload Dataset</button></div>';
+    $('#previewChip').innerHTML = '<i data-lucide="circle-dashed"></i><span>Empty</span>';
+    icons(); return;
+  }
+  const rows = getRows();
+  const cols = getColumns().map(c => c.name);
+  el.innerHTML = renderTable(rows, cols, 6) + '<p class="hint">Showing first 6 of ' + fmtNum(rows.length) + ' rows.</p>';
+  $('#previewChip').innerHTML = '<i data-lucide="table-2"></i><span>' + rows.length + ' × ' + cols.length + '</span>';
+  icons();
+}
+
+function renderQuickActions(){
+  const actions = [
+    {v:'upload', i:'upload-cloud', t:'Upload Data', s:'CSV or Excel'},
+    {v:'overview', i:'table-2', t:'Data Overview', s:'Profile columns'},
+    {v:'chat', i:'message-square', t:'Ask a Question', s:'Natural language'},
+    {v:'sql', i:'terminal', t:'Generate SQL', s:'English to query'},
+    {v:'viz', i:'bar-chart-3', t:'Visualize', s:'Bar, line, pie'},
+    {v:'insights', i:'sparkles', t:'Find Insights', s:'Patterns & more'},
+    {v:'cleaning', i:'wand-2', t:'Clean Data', s:'Fix quality issues'},
+    {v:'reports', i:'file-text', t:'Export Report', s:'PDF & Excel'}
+  ];
+  $('#quickActions').innerHTML = actions.map(a =>
+    '<button class="qa" data-goto="' + a.v + '"><div class="qa-ico"><i data-lucide="' + a.i + '"></i></div>' +
+    '<strong>' + a.t + '</strong><small>' + a.s + '</small></button>').join('');
+  icons();
+}
+
+function renderActivity(){
+  const el = $('#activityList');
+  if (!el) return;
+  if (!state.activity.length){
+    el.innerHTML = '<li><div class="act-ico"><i data-lucide="clock"></i></div><div class="act-body"><p>No activity yet</p><span>Load a dataset to begin.</span></div></li>';
+    icons(); return;
+  }
+  el.innerHTML = state.activity.map(a => {
+    const t = a.time.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    return '<li><div class="act-ico"><i data-lucide="' + a.icon + '"></i></div><div class="act-body"><p>' + esc(a.text) + '</p><span>' + t + '</span></div></li>';
+  }).join('');
+  icons();
+}
+
+/* ---------------- charts ---------------- */
+function destroyChart(key){
+  if (state.charts[key]){ try { state.charts[key].destroy(); } catch(e){} delete state.charts[key]; }
+}
+const CHART_COLORS = ['#3b6ef6','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#6366f1','#ec4899','#14b8a6','#f97316','#a855f7','#0ea5e9'];
+
+function renderDashboardChart(){
+  const hint = $('#dashChartHint');
+  destroyChart('dash');
+  if (!state.dataset){
+    hint.textContent = 'Charts appear once a dataset is loaded.';
+    return;
+  }
+  const dim = primaryDimension();
+  const metric = primaryMetric();
+  if (!dim || !metric){
+    hint.textContent = 'Not enough numeric/categorical columns for an automatic chart.';
+    return;
+  }
+  const agg = aggregate(dim, metric, 'SUM').slice(0, 8);
+  const ctx = $('#dashChart');
+  state.charts.dash = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: agg.map(a => a.label),
+      datasets: [{label: 'Total ' + metric, data: agg.map(a => a.value), backgroundColor: agg.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]), borderRadius: 8, maxBarThickness: 46}]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {legend: {display: false}, tooltip: {backgroundColor: '#0f172a', padding: 10, cornerRadius: 8, displayColors: false,
+        callbacks: {label: c => metric + ': ' + fmtNum(c.parsed.y)}}},
+      scales: {
+        x: {grid: {display: false}, ticks: {font: {size: 10.5}, color: '#7b8aa3', maxRotation: 30, minRotation: 0}},
+        y: {grid: {color: '#eef3fa'}, border: {display: false}, ticks: {font: {size: 10.5}, color: '#7b8aa3', callback: v => fmtNum(v)}}
+      }
+    }
+  });
+  hint.textContent = 'Sum of ' + metric + ' grouped by ' + dim + ' — computed from your uploaded data.';
+}
+
+/* =====================================================================
+   RENDER: VIEWS
+   ===================================================================== */
+function renderDashboard(){
+  renderStatGrid('#dashStats');
+  renderPreviewBlock();
+  renderDashboardChart();
+  renderQuickActions();
+  renderActivity();
+
+  const p = getProfile();
+  const heroSub = $('#heroSub');
+  const art = $('#artCard');
+  if (p){
+    heroSub.innerHTML = 'Connected to <strong style="color:#dbe6ff">' + esc(state.dataset.name) + '</strong> — ' +
+      fmtNum(p.rowCount) + ' rows and ' + p.colCount + ' columns ready for analysis.';
+    const dim = primaryDimension(), metric = primaryMetric();
+    if (dim && metric){
+      const agg = aggregate(dim, metric, 'SUM').slice(0, 4);
+      const max = Math.max(...agg.map(a => a.value)) || 1;
+      art.innerHTML = agg.map(a =>
+        '<div class="art-row"><span style="min-width:64px;max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' +
+        esc(a.label) + '</span><div class="art-bar"><i style="width:' + Math.max(6, (a.value / max) * 100) + '%"></i></div></div>'
+      ).join('');
+    }
+  } else {
+    heroSub.textContent = 'Upload a CSV or Excel file to unlock automatic profiling, natural language chat, SQL generation, live charts, insights, cleaning and downloadable reports.';
+    art.innerHTML = '<div class="art-row"><i data-lucide="activity" style="width:13px;height:13px"></i><span>Waiting for data</span></div>' +
+      '<div class="art-row"><div class="art-bar"><i style="width:14%"></i></div></div>' +
+      '<div class="art-row"><div class="art-bar"><i style="width:8%"></i></div></div>' +
+      '<div class="art-row"><div class="art-bar"><i style="width:10%"></i></div></div>';
+  }
+  icons();
+}
+
+function renderUpload(){
+  const el = $('#fileInfo');
+  const chip = $('#fileStatusChip');
+  if (!state.dataset){
+    chip.innerHTML = '<i data-lucide="circle-dashed"></i><span>No file</span>';
+    el.innerHTML = '<div class="empty"><div class="empty-ico"><i data-lucide="file-search"></i></div><h4>No dataset loaded yet</h4><p>Drag a file onto the dropzone above, browse your computer, or load the sample dataset to explore every feature instantly.</p></div>';
+    icons(); return;
+  }
+  const d = state.dataset;
+  const p = d.profile;
+  chip.innerHTML = '<i data-lucide="check-circle-2"></i><span>Loaded</span>';
+  el.innerHTML = `
+    <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:0">
+      <div class="stat"><div class="stat-top"><div class="stat-ico tone-blue"><i data-lucide="file-spreadsheet"></i></div><div class="stat-label">File Name</div></div>
+        <div class="stat-value" style="font-size:14px;word-break:break-all">${esc(d.name)}</div>
+        <div class="stat-foot">${d.isSample ? 'Built-in sample dataset' : 'Uploaded by you'}</div></div>
+      <div class="stat"><div class="stat-top"><div class="stat-ico tone-violet"><i data-lucide="hard-drive"></i></div><div class="stat-label">File Size</div></div>
+        <div class="stat-value">${d.size ? (d.size / 1024).toFixed(1) + ' KB' : '—'}</div><div class="stat-foot">Maximum allowed 10 MB</div></div>
+      <div class="stat"><div class="stat-top"><div class="stat-ico tone-green"><i data-lucide="rows-3"></i></div><div class="stat-label">Rows</div></div>
+        <div class="stat-value">${fmtNum(p.rowCount)}</div><div class="stat-foot">Parsed records</div></div>
+      <div class="stat"><div class="stat-top"><div class="stat-ico tone-amber"><i data-lucide="columns-3"></i></div><div class="stat-label">Columns</div></div>
+        <div class="stat-value">${p.colCount}</div><div class="stat-foot">Detected fields</div></div>
+    </div>
+    <div class="row mt18">
+      <button class="btn btn-outline btn-sm" data-goto="overview"><i data-lucide="table-2"></i> View Full Profile</button>
+      <button class="btn btn-outline btn-sm" id="replaceBtn"><i data-lucide="refresh-cw"></i> Replace Dataset</button>
+      <button class="btn btn-danger btn-sm" id="removeBtn"><i data-lucide="trash-2"></i> Remove Dataset</button>
+    </div>
+    <div class="card-head" style="margin-top:22px;margin-bottom:12px"><h3>Column Types</h3></div>
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+      ${p.cols.map(c => '<span class="chip"><i data-lucide="' + (c.type === 'number' ? 'hash' : c.type === 'date' ? 'calendar' : 'type') + '"></i>' + esc(c.name) + ' · ' + c.type + '</span>').join('')}
+    </div>`;
+  const rb = $('#replaceBtn'); if (rb) rb.onclick = () => $('#fileInput').click();
+  const rm = $('#removeBtn'); if (rm) rm.onclick = removeDataset;
+  icons();
+}
+
+function renderOverview(){
+  const el = $('#overviewBody');
+  if (!state.dataset){
+    el.innerHTML = '<div class="card pad"><div class="empty"><div class="empty-ico"><i data-lucide="table-2"></i></div><h4>No data to profile</h4><p>Upload a dataset to automatically calculate column types, missing values, duplicates and full descriptive statistics.</p><button class="btn btn-primary btn-sm" data-goto="upload"><i data-lucide="upload-cloud"></i> Upload Dataset</button></div></div>';
+    icons(); return;
+  }
+  const p = getProfile();
+  const rows = getRows();
+  const cols = getColumns().map(c => c.name);
+  const pageSize = 8;
+  const pages = Math.max(1, Math.ceil(rows.length / pageSize));
+  if (state.previewPage >= pages) state.previewPage = 0;
+  const start = state.previewPage * pageSize;
+  const pageRows = rows.slice(start, start + pageSize);
+
+  const summaryCards = `
+    <div class="stat-grid" style="margin-top:0">
+      <div class="stat"><div class="stat-top"><div class="stat-ico tone-blue"><i data-lucide="rows-3"></i></div><div class="stat-label">Rows</div></div><div class="stat-value">${fmtNum(p.rowCount)}</div></div>
+      <div class="stat"><div class="stat-top"><div class="stat-ico tone-violet"><i data-lucide="columns-3"></i></div><div class="stat-label">Columns</div></div><div class="stat-value">${p.colCount}</div></div>
+      <div class="stat"><div class="stat-top"><div class="stat-ico tone-amber"><i data-lucide="alert-triangle"></i></div><div class="stat-label">Missing Cells</div></div><div class="stat-value">${fmtNum(p.totalMissing)}</div></div>
+      <div class="stat"><div class="stat-top"><div class="stat-ico tone-red"><i data-lucide="copy"></i></div><div class="stat-label">Duplicates</div></div><div class="stat-value">${fmtNum(p.duplicates)}</div></div>
+    </div>`;
+
+  const colTable = `
+    <div class="table-wrap"><table class="dt"><thead><tr>
+      <th>Column</th><th>Type</th><th class="num">Non-Null</th><th class="num">Missing</th><th class="num">Unique</th><th>Sample / Top Value</th>
+    </tr></thead><tbody>
+    ${p.cols.map(c => `<tr>
+      <td><strong>${esc(c.name)}</strong></td>
+      <td><span class="chip" style="padding:3px 9px;font-size:11px"><i data-lucide="${c.type === 'number' ? 'hash' : c.type === 'date' ? 'calendar' : 'type'}"></i>${c.type}</span></td>
+      <td class="num">${fmtNum(c.count)}</td>
+      <td class="num" style="color:${c.missing ? '#b45309' : 'inherit'}">${fmtNum(c.missing)}</td>
+      <td class="num">${fmtNum(c.unique)}</td>
+      <td title="${esc(c.top ? c.top.value : '')}">${c.top ? esc(c.top.value) + ' <span style="color:#9aa9bf">(' + c.top.count + ')</span>' : '—'}</td>
+    </tr>`).join('')}
+    </tbody></table></div>`;
+
+  const numeric = p.cols.filter(c => c.type === 'number');
+  const statsTable = numeric.length ? `
+    <div class="table-wrap"><table class="dt"><thead><tr>
+      <th>Numeric Column</th><th class="num">Count</th><th class="num">Mean</th><th class="num">Median</th>
+      <th class="num">Min</th><th class="num">Max</th><th class="num">Std Dev</th><th class="num">Sum</th>
+    </tr></thead><tbody>
+    ${numeric.map(c => `<tr>
+      <td><strong>${esc(c.name)}</strong></td>
+      <td class="num">${fmtNum(c.count)}</td>
+      <td class="num">${fmtNum(c.mean)}</td>
+      <td class="num">${fmtNum(c.median)}</td>
+      <td class="num">${fmtNum(c.min)}</td>
+      <td class="num">${fmtNum(c.max)}</td>
+      <td class="num">${fmtNum(c.std)}</td>
+      <td class="num">${fmtNum(c.sum)}</td>
+    </tr>`).join('')}
+    </tbody></table></div>` : '<div class="empty"><div class="empty-ico"><i data-lucide="hash"></i></div><h4>No numeric columns</h4><p>Descriptive statistics require at least one numeric column.</p></div>';
+
+  const categorical = p.cols.filter(c => c.type !== 'number');
+  const catCards = categorical.length ? categorical.slice(0, 6).map(c => `
+    <div class="insight" style="box-shadow:none;background:#fbfcff">
+      <div class="insight-top">
+        <div class="insight-ico tone-violet"><i data-lucide="type"></i></div>
+        <h4>${esc(c.name)}</h4>
+        <span class="tag fact">${c.unique} unique</span>
+      </div>
+      <p>Most frequent: <strong>${esc(c.top ? c.top.value : '—')}</strong>${c.top ? ' appearing ' + c.top.count + ' times.' : '.'} Missing values: ${c.missing}.</p>
+    </div>`).join('') : '<div class="empty"><div class="empty-ico"><i data-lucide="type"></i></div><h4>No categorical columns</h4></div>';
+
+  el.innerHTML = summaryCards + `
+    <div class="card pad mt18">
+      <div class="card-head"><h3>Column Profile</h3><span class="chip"><i data-lucide="scan-search"></i><span>${p.colCount} columns</span></span></div>
+      ${colTable}
+    </div>
+    <div class="card pad mt18">
+      <div class="card-head"><h3>Descriptive Statistics</h3><span class="chip"><i data-lucide="sigma"></i><span>${numeric.length} numeric</span></span></div>
+      ${statsTable}
+    </div>
+    <div class="card pad mt18">
+      <div class="card-head"><h3>Categorical Summary</h3></div>
+      <div class="insight-grid">${catCards}</div>
+    </div>
+    <div class="card pad mt18">
+      <div class="card-head"><h3>Data Preview</h3><span class="chip"><i data-lucide="table-2"></i><span>Page ${state.previewPage + 1} / ${pages}</span></span></div>
+      ${renderTable(pageRows, cols)}
+      <div class="pager">
+        <span>Showing rows ${rows.length ? start + 1 : 0}–${Math.min(start + pageSize, rows.length)} of ${fmtNum(rows.length)}</span>
+        <button class="btn btn-outline btn-sm" id="prevPage" ${state.previewPage === 0 ? 'disabled' : ''}><i data-lucide="chevron-left"></i> Prev</button>
+        <button class="btn btn-outline btn-sm" id="nextPage" ${state.previewPage >= pages - 1 ? 'disabled' : ''}>Next <i data-lucide="chevron-right"></i></button>
+      </div>
+    </div>`;
+
+  const prev = $('#prevPage'), next = $('#nextPage');
+  if (prev) prev.onclick = () => { state.previewPage--; renderOverview(); };
+  if (next) next.onclick = () => { state.previewPage++; renderOverview(); };
+  icons();
+}
+
+/* ---------------- chat ---------------- */
+function pushChat(role, html, extra){
+  state.chat.push({role, html, extra: extra || null});
+  renderChat();
+}
+function renderChat(){
+  const body = $('#chatBody');
+  if (!body) return;
+  if (!state.chat.length){
+    body.innerHTML = '<div class="msg"><div class="msg-avatar"><i data-lucide="bot"></i></div><div class="bubble">' +
+      (state.dataset
+        ? 'Hi! I am DataMind AI. I can answer questions about <strong>' + esc(state.dataset.name) + '</strong> using real calculations from your data.<br><br>Try: <em>"What are the total sales?"</em> or <em>"Which product has the highest sales?"</em>'
+        : '👋 Welcome! Load a dataset first (Upload Dataset → Use Sample Dataset) and then ask me anything about it in plain English.') +
+      '</div></div>';
+    icons(); return;
+  }
+  body.innerHTML = state.chat.map(m => {
+    const avatar = m.role === 'user' ? '<div class="msg-avatar">You</div>' : '<div class="msg-avatar"><i data-lucide="bot"></i></div>';
+    return '<div class="msg ' + m.role + '">' + avatar + '<div class="bubble">' + m.html + '</div></div>';
+  }).join('');
+  body.scrollTop = body.scrollHeight;
+  icons();
+}
+function renderChatSuggestions(){
+  const el = $('#chatSugg');
+  const base = state.dataset ? [
+    'What are the total sales?',
+    'Which product has the highest sales?',
+    'Which region performs best?',
+    'Show the top five customers',
+    'What is the average profit?',
+    'How many rows are in the dataset?'
+  ] : ['How do I get started?'];
+  el.innerHTML = base.map(s => '<button data-q="' + esc(s) + '">' + esc(s) + '</button>').join('');
+  $$('#chatSugg button').forEach(b => b.onclick = () => { $('#chatInput').value = b.dataset.q; sendChat(); });
+}
+
+function sendChat(){
+  const input = $('#chatInput');
+  const q = input.value.trim();
+  if (!q) return;
+  input.value = '';
+  pushChat('user', esc(q));
+  const body = $('#chatBody');
+  const typing = document.createElement('div');
+  typing.className = 'msg';
+  typing.id = 'typingMsg';
+  typing.innerHTML = '<div class="msg-avatar"><i data-lucide="bot"></i></div><div class="bubble"><div class="typing"><i></i><i></i><i></i></div></div>';
+  body.appendChild(typing);
+  body.scrollTop = body.scrollHeight;
+  icons();
+
+  setTimeout(async () => {
+    const t = document.getElementById('typingMsg'); if (t) t.remove();
+    if (!state.dataset){
+      pushChat('assistant', 'I need a dataset before I can calculate anything. Head to <strong>Upload Dataset</strong> and load a CSV, Excel file, or the sample dataset.');
+      return;
+    }
+    try {
+      try {
+        const backend = await apiRequest('/api/chat', {question:q});
+        if (backend && backend.answer) {
+          const source = backend.source === 'gemini' ? 'Gemini-assisted explanation (computed result)' : 'Flask local analytics';
+          pushChat('assistant', '<p>'+esc(backend.answer)+'</p><div class="sql-tag">'+esc(source)+(backend.sql ? '\n'+esc(backend.sql) : '')+'</div>');
+          logActivity('message-square', 'Asked: "' + q.slice(0, 60) + '"');
+          return;
+        }
+      } catch(apiErr) { console.warn('Backend chat unavailable; using local chat:', apiErr.message); }
+      const gen = generateSQL(q);
+      const res = runSQL(gen.sql);
+      let html = describeResult(gen, res);
+      if (res.rows.length > 1){
+        const preview = res.rows.slice(0, 5).map(r => '<tr>' + r.map(v => '<td>' + fmtAny(v) + '</td>').join('') + '</tr>').join('');
+        html += '<div class="mini-table"><table><thead><tr>' + res.columns.map(c => '<th>' + esc(c) + '</th>').join('') + '</tr></thead><tbody>' + preview + '</tbody></table></div>';
+      }
+      html += '<div class="sql-tag">' + esc(gen.sql) + '</div>';
+      pushChat('assistant', html);
+      logActivity('message-square', 'Asked: "' + q.slice(0, 60) + '"');
+    } catch (err){
+      pushChat('assistant', 'I could not run that query: <strong>' + esc(err.message) + '</strong><br><br>Try mentioning a column name explicitly, e.g. <em>"total sales by region"</em>.');
+    }
+  }, 520);
+}
+
+/* ---------------- SQL view ---------------- */
+function renderSQLView(){
+  const el = $('#sqlSugg');
+  const base = state.dataset ? [
+    'What are the total sales?',
+    'Show sales by region',
+    'Which product has the highest sales?',
+    'Average profit by category',
+    'How many rows are in the dataset?'
+  ] : ['Upload a dataset first'];
+  el.innerHTML = base.map(s => '<button class="btn btn-outline btn-sm" data-q="' + esc(s) + '">' + esc(s) + '</button>').join('');
+  $$('#sqlSugg button').forEach(b => b.onclick = () => { $('#sqlQuestion').value = b.dataset.q; doGenerateSQL(); });
+  if (!state.lastSQL){
+    $('#sqlOutput').innerHTML = '<span style="color:#62789c">// Generated SQL will appear here…</span>';
+  }
+  icons();
+}
+function highlightSQL(sql){
+  return esc(sql)
+    .replace(/\b(SELECT|FROM|WHERE|GROUP BY|ORDER BY|LIMIT|AS|AND|OR|DESC|ASC|LIKE|DISTINCT)\b/g, '<span class="kw">$1</span>')
+    .replace(/\b(SUM|AVG|COUNT|MIN|MAX)\b/g, '<span class="fn">$1</span>');
+}
+function doGenerateSQL(){
+  const q = $('#sqlQuestion').value.trim();
+  if (!q){ toast('Type a question first.', 'err'); return; }
+  if (!state.dataset){ toast('Upload a dataset before generating SQL.', 'err'); return; }
+  try {
+    const gen = generateSQL(q);
+    state.lastSQL = gen;
+    $('#sqlOutput').innerHTML = highlightSQL(gen.sql) + '<button class="copy-btn" id="copySql"><i data-lucide="copy"></i> Copy</button>';
+    $('#sqlExplain').style.display = 'block';
+    $('#sqlExplainText').textContent = gen.explanation;
+    const cb = $('#copySql');
+    cb.onclick = () => { navigator.clipboard.writeText(gen.sql).then(() => toast('SQL copied to clipboard', 'ok')).catch(() => toast('Copy failed', 'err')); };
+    icons();
+    runCurrentSQL();
+    logActivity('terminal', 'Generated SQL for "' + q.slice(0, 50) + '"');
+  } catch (err){
+    toast(err.message, 'err');
+  }
+}
+function runCurrentSQL(){
+  const resEl = $('#sqlResult');
+  if (!state.lastSQL){ resEl.innerHTML = '<div class="empty"><div class="empty-ico"><i data-lucide="terminal"></i></div><h4>No query yet</h4><p>Generate a query from English or write your own and press Execute.</p></div>'; icons(); return; }
+  try {
+    const res = runSQL(state.lastSQL.sql);
+    state.lastResult = res;
+    $('#sqlRowCount').innerHTML = '<i data-lucide="rows-3"></i><span>' + res.rows.length + ' rows</span>';
+    if (!res.rows.length){
+      resEl.innerHTML = '<div class="empty"><div class="empty-ico"><i data-lucide="search-x"></i></div><h4>No rows returned</h4><p>The query executed successfully but matched zero rows.</p></div>';
+    } else {
+      const objRows = res.rows.map(r => { const o = {}; res.columns.forEach((c, i) => o[c] = r[i]); return o; });
+      resEl.innerHTML = renderTable(objRows, res.columns);
+    }
+    icons();
+    // Also execute against the Flask/Pandas dataset when the backend is connected.
+    apiRequest('/api/sql', {sql:state.lastSQL.sql}).then(remote=>{
+      if(remote && Array.isArray(remote.rows)){
+        state.lastResult = {columns:remote.columns, rows:remote.rows};
+        $('#sqlRowCount').innerHTML = '<i data-lucide="rows-3"></i><span>'+remote.row_count+' backend rows</span>';
+        const remoteObjects=remote.rows.map(r=>{const o={};remote.columns.forEach((c,i)=>o[c]=r[i]);return o;});
+        resEl.innerHTML=remoteObjects.length?renderTable(remoteObjects,remote.columns):'<p class="hint">Backend query returned no rows.</p>';
+        icons();
+      }
+    }).catch(err=>console.warn('Backend SQL unavailable; local SQL result retained:',err.message));
+  } catch (err){
+    $('#sqlRowCount').innerHTML = '<i data-lucide="alert-triangle"></i><span>Error</span>';
+    resEl.innerHTML = '<div class="empty" style="border-color:#fecaca;background:#fff7f7"><div class="empty-ico" style="background:#fef2f2;border-color:#fecaca;color:#b91c1c"><i data-lucide="shield-alert"></i></div><h4 style="color:#b91c1c">Query rejected</h4><p>' + esc(err.message) + '</p></div>';
+    icons();
+  }
+}
+
+/* ---------------- visualizations ---------------- */
+function populateVizSelects(){
+  if (!state.dataset) return;
+  const xSel = $('#vizX'), ySel = $('#vizY');
+  const _p = getProfile(); const cats = _p ? _p.cols.filter(c => c.type !== 'number' || c.unique <= 15) : [];
+  xSel.innerHTML = cats.map(c => '<option value="' + esc(c.name) + '">' + esc(c.name) + '</option>').join('');
+  ySel.innerHTML = numericCols().map(n => '<option value="' + esc(n) + '">' + esc(n) + '</option>').join('') +
+                   '<option value="__none__">(row count)</option>';
+  const dim = primaryDimension(), metric = primaryMetric();
+  if (dim) xSel.value = dim;
+  if (metric) ySel.value = metric;
+}
+function renderMainChart(){
+  if (!state.dataset){
+    destroyChart('main');
+    $('#vizTitle').textContent = 'Chart';
+    $('#vizMeta').innerHTML = '<i data-lucide="circle-dashed"></i><span>No data</span>';
+    $('#vizHint').textContent = 'Load a dataset to render charts.';
+    icons(); return;
+  }
+  const type = $('#vizType').value;
+  const x = $('#vizX').value;
+  const yRaw = $('#vizY').value;
+  const agg = $('#vizAgg').value;
+  const y = yRaw === '__none__' ? null : yRaw;
+
+  if (!x){ toast('Select a category column.', 'err'); return; }
+  const aggRes = aggregate(x, y, y ? agg : 'COUNT').slice(0, 14);
+  if (!aggRes.length){ toast('No data available for this selection.', 'err'); return; }
+
+  destroyChart('main');
+  const ctx = $('#mainChart');
+  const label = (y ? (agg === 'SUM' ? 'Total ' : agg === 'AVG' ? 'Average ' : agg === 'MAX' ? 'Max ' : agg === 'MIN' ? 'Min ' : '') + y : 'Row count');
+  const isPie = type === 'doughnut';
+
+  state.charts.main = new Chart(ctx, {
+    type,
+    data: {
+      labels: aggRes.map(a => a.label),
+      datasets: [{
+        label,
+        data: aggRes.map(a => a.value),
+        backgroundColor: isPie ? CHART_COLORS : aggRes.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
+        borderRadius: isPie ? 0 : 8,
+        borderWidth: isPie ? 2 : 0,
+        borderColor: '#fff',
+        maxBarThickness: 52,
+        tension: 0.35,
+        pointRadius: 4,
+        pointBackgroundColor: '#fff',
+        pointBorderWidth: 2.5,
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {display: isPie, position: 'right', labels: {boxWidth: 11, boxHeight: 11, usePointStyle: true, font: {size: 11.5}, color: '#5b6b85'}},
+        tooltip: {backgroundColor: '#0f172a', padding: 11, cornerRadius: 9,
+          callbacks: {label: c => ' ' + (c.dataset.label || '') + ': ' + fmtNum(c.parsed.y ?? c.parsed)}}
+      },
+      scales: isPie ? {} : {
+        x: {grid: {display: false}, ticks: {font: {size: 11}, color: '#7b8aa3', maxRotation: 40, minRotation: 0}},
+        y: {grid: {color: '#eef3fa'}, border: {display: false}, ticks: {font: {size: 11}, color: '#7b8aa3', callback: v => fmtNum(v)}}
+      }
+    }
+  });
+  $('#vizTitle').textContent = label + ' by ' + x;
+  $('#vizMeta').innerHTML = '<i data-lucide="layers"></i><span>' + aggRes.length + ' categories</span>';
+  $('#vizHint').textContent = 'Chart rendered from ' + fmtNum(getRows().length) + ' rows of actual data.';
+  icons();
+}
+function autoSuggestViz(){
+  if (!state.dataset){ toast('Load a dataset first.', 'err'); return; }
+  populateVizSelects();
+  const dim = primaryDimension();
+  if (!dim){ toast('No categorical column suitable for a chart.', 'err'); return; }
+  populateVizSelects();
+  $('#vizX').value = dim;
+  const metric = primaryMetric();
+  if (metric) { $('#vizY').value = metric; $('#vizAgg').value = 'SUM'; $('#vizType').value = 'bar'; }
+  else { $('#vizY').value = '__none__'; $('#vizAgg').value = 'COUNT'; }
+  renderMainChart();
+  toast('Auto-suggested chart applied.', 'ok');
+}
+
+/* ---------------- insights ---------------- */
+function computeInsights(){
+  const out = [];
+  if (!state.dataset) return out;
+  const p = getProfile();
+  const rows = getRows();
+
+  out.push({icon: 'database', tone: 'tone-blue', tag: 'fact', title: 'Dataset Scale',
+    text: 'This dataset contains <strong>' + fmtNum(p.rowCount) + '</strong> rows and <strong>' + p.colCount + '</strong> columns, with ' +
+      p.cols.filter(c => c.type === 'number').length + ' numeric and ' + p.cols.filter(c => c.type !== 'number').length + ' categorical fields.'});
+
+  const missPct = p.rowCount * p.colCount ? (p.totalMissing / (p.rowCount * p.colCount) * 100) : 0;
+  out.push({icon: missPct > 5 ? 'alert-triangle' : 'check-circle-2', tone: missPct > 5 ? 'tone-amber' : 'tone-green',
+    tag: missPct > 5 ? 'warn' : 'fact', title: 'Missing Data Quality',
+    text: missPct === 0 ? 'No missing cells were detected — the dataset is complete across every column.'
+      : 'There are <strong>' + fmtNum(p.totalMissing) + '</strong> missing cells (' + missPct.toFixed(1) + '% of the grid). ' +
+        'The most affected column is <strong>' + esc([...p.cols].sort((a, b) => b.missing - a.missing)[0].name) + '</strong>.',
+    kv: [['Duplicates: ' + p.duplicates]]});
+
+  const metric = primaryMetric();
+  const dim = primaryDimension();
+
+  if (metric && dim){
+    const agg = aggregate(dim, metric, 'SUM');
+    if (agg.length){
+      const top = agg[0], bottom = agg[agg.length - 1];
+      const total = agg.reduce((a, b) => a + b.value, 0);
+      const share = total ? (top.value / total * 100) : 0;
+      out.push({icon: 'trophy', tone: 'tone-violet', tag: 'fact', title: 'Top ' + dim + ' by ' + metric,
+        text: '<strong>' + esc(top.label) + '</strong> leads with a total ' + metric + ' of <strong>' + fmtNum(top.value) + '</strong>, representing ' +
+          share.toFixed(1) + '% of the overall ' + metric + '. The lowest is <strong>' + esc(bottom.label) + '</strong> at ' + fmtNum(bottom.value) + '.',
+        kv: [['Groups: ' + agg.length], ['Total: ' + fmtNum(total)]]});
+
+      if (agg.length >= 2 && total > 0){
+        const ratio = bottom.value ? top.value / bottom.value : null;
+        out.push({icon: 'trending-up', tone: 'tone-blue', tag: 'ai', title: 'Interpretation · Concentration',
+          text: ratio && ratio > 2
+            ? 'Performance is highly concentrated: the top group is roughly <strong>' + ratio.toFixed(1) + '×</strong> the bottom group, suggesting uneven distribution across ' + dim + '.'
+            : 'Performance across ' + dim + ' is relatively balanced — no single group dominates the total ' + metric + '.'});
+      }
+    }
+  }
+
+  p.cols.filter(c => c.type === 'number').slice(0, 3).forEach(c => {
+    const colVals = rows.map(r => r[c.name]).filter(v => typeof v === 'number');
+    if (!colVals.length) return;
+    out.push({icon: 'arrow-up-down', tone: 'tone-slate', tag: 'fact', title: c.name + ' Range',
+      text: 'Values range from <strong>' + fmtNum(c.min) + '</strong> to <strong>' + fmtNum(c.max) + '</strong> with a mean of <strong>' + fmtNum(c.mean) +
+        '</strong> and a median of ' + fmtNum(c.median) + '. The standard deviation is ' + fmtNum(c.std) + '.',
+      kv: [['Count: ' + fmtNum(c.count)], ['Sum: ' + fmtNum(c.sum)]]});
+
+    if (c.std && c.std > 0){
+      const lo = c.mean - 2.5 * c.std, hi = c.mean + 2.5 * c.std;
+      const outliers = colVals.filter(v => v < lo || v > hi).length;
+      if (outliers){
+        out.push({icon: 'activity', tone: 'tone-amber', tag: 'warn', title: 'Unusual Values · ' + c.name,
+          text: '<strong>' + outliers + '</strong> record(s) fall outside 2.5 standard deviations of the mean (' + fmtNum(lo) + ' to ' + fmtNum(hi) +
+            '). These may be genuine extremes or data-entry errors worth reviewing.'});
+      }
+    }
+  });
+
+  if (p.duplicates > 0){
+    out.push({icon: 'copy', tone: 'tone-red', tag: 'warn', title: 'Duplicate Records',
+      text: '<strong>' + p.duplicates + '</strong> fully duplicated row(s) were detected. Removing them in Data Cleaning will improve accuracy of aggregates.'});
+  }
+
+  const dateCol = p.cols.find(c => c.type === 'date');
+  if (dateCol && metric){
+    const withDate = rows.filter(r => r[dateCol.name] && r[metric] !== null && typeof r[metric] === 'number')
+      .map(r => ({d: String(r[dateCol.name]), v: r[metric]}))
+      .sort((a, b) => a.d.localeCompare(b.d));
+    if (withDate.length > 8){
+      const half = Math.floor(withDate.length / 2);
+      const firstAvg = withDate.slice(0, half).reduce((a, b) => a + b.v, 0) / half;
+      const secondAvg = withDate.slice(half).reduce((a, b) => a + b.v, 0) / (withDate.length - half);
+      const change = firstAvg ? ((secondAvg - firstAvg) / firstAvg * 100) : 0;
+      out.push({icon: change >= 0 ? 'trending-up' : 'trending-down', tone: change >= 0 ? 'tone-green' : 'tone-red',
+        tag: 'ai', title: 'Trend Interpretation · ' + metric,
+        text: 'Comparing the first half of the ' + dateCol.name + ' period to the second half, average ' + metric + ' ' +
+          (change >= 0 ? 'increased' : 'decreased') + ' by <strong>' + Math.abs(change).toFixed(1) + '%</strong> (' +
+          fmtNum(firstAvg) + ' → ' + fmtNum(secondAvg) + '). This is a computed comparison, not a causal conclusion.',
+        kv: [['Span: ' + withDate[0].d], ['to: ' + withDate[withDate.length - 1].d]]});
+    }
+  }
+
+  if (dim){
+    const dimCol = p.cols.find(c => c.name === dim);
+    if (dimCol && dimCol.top){
+      out.push({icon: 'layers', tone: 'tone-violet', tag: 'fact', title: 'Most Frequent ' + dim,
+        text: '<strong>' + esc(dimCol.top.value) + '</strong> appears <strong>' + dimCol.top.count + '</strong> times, covering ' +
+          (dimCol.count ? (dimCol.top.count / dimCol.count * 100).toFixed(1) : '0') + '% of non-empty records in this column.',
+        kv: [['Unique values: ' + dimCol.unique]]});
+    }
+  }
+  return out;
+}
+function renderInsights(){
+  const el = $('#insightsBody');
+  if (!state.dataset){
+    $('#insightsCount').innerHTML = '<i data-lucide="sparkles"></i><span>0 insights</span>';
+    el.innerHTML = '<div class="card pad"><div class="empty"><div class="empty-ico"><i data-lucide="sparkles"></i></div><h4>No insights yet</h4><p>Load a dataset and DataMind AI will compute extremes, distributions, missing data, duplicates and trends automatically.</p><button class="btn btn-primary btn-sm" data-goto="upload"><i data-lucide="upload-cloud"></i> Upload Dataset</button></div></div>';
+    icons(); return;
+  }
+  state.insights = computeInsights();
+  $('#insightsCount').innerHTML = '<i data-lucide="sparkles"></i><span>' + state.insights.length + ' insights</span>';
+  const tagCls = t => t === 'ai' ? 'ai' : t === 'warn' ? 'warn' : 'fact';
+  const tagTxt = t => t === 'ai' ? 'Computed interpretation' : t === 'warn' ? 'Attention' : 'Computed fact';
+  el.innerHTML = '<div class="insight-grid">' + state.insights.map(i => `
+    <div class="insight">
+      <div class="insight-top">
+        <div class="insight-ico ${i.tone}"><i data-lucide="${i.icon}"></i></div>
+        <h4>${esc(i.title)}</h4>
+        <span class="tag ${tagCls(i.tag)}">${tagTxt(i.tag)}</span>
+      </div>
+      <p>${i.text}</p>
+      ${i.kv ? '<div class="kv">' + i.kv.map(k => '<span>' + esc(k[0]) + '</span>').join('') + '</div>' : ''}
+    </div>`).join('') + '</div>';
+  icons();
+  apiRequest('/api/insights', {}).then(remote=>{
+    if(remote.gemini_explanation){
+      const note=document.createElement('div'); note.className='card pad mt18';
+      note.innerHTML='<div class="card-head"><h3>Gemini Explanation</h3><span class="chip">AI-assisted</span></div><p>'+esc(remote.gemini_explanation)+'</p><p class="hint">This explanation is based on computed profile findings; verify important decisions against the underlying data.</p>';
+      el.appendChild(note); icons();
+    }
+  }).catch(err=>console.warn('Backend insights unavailable; computed browser insights remain visible:',err.message));
+}
+
+/* ---------------- cleaning ---------------- */
+function missingFor(rows, col){
+  return rows.reduce((a, r) => a + (isNil(r[col]) || String(r[col]).trim() === '' ? 1 : 0), 0);
+}
+function duplicatesFor(rows){
+  const seen = new Set(); let d = 0;
+  rows.forEach(r => { const k = JSON.stringify(r); if (seen.has(k)) d++; else seen.add(k); });
+  return d;
+}
+function applyCleaningOps(rows, columns, opts){
+  let out = rows.map(r => ({...r}));
+  const log = [];
+  let droppedCols = [];
+
+  if (opts.dropEmptyCols){
+    const emptyCols = columns.filter(c => out.every(r => isNil(r[c.name]) || String(r[c.name]).trim() === '')).map(c => c.name);
+    if (emptyCols.length){ out.forEach(r => emptyCols.forEach(c => delete r[c])); droppedCols = emptyCols; log.push('Dropped ' + emptyCols.length + ' empty column(s): ' + emptyCols.join(', ')); }
+  }
+  const resultColumns = columns.filter(c => !droppedCols.includes(c.name));
+  if (opts.dropDuplicates){
+    const seen = new Set(); const before = out.length;
+    out = out.filter(r => { const k = JSON.stringify(r); if (seen.has(k)) return false; seen.add(k); return true; });
+    log.push('Removed ' + (before - out.length) + ' duplicate row(s).');
+  }
+  if (opts.dropMissingRows){
+    const before = out.length;
+    out = out.filter(r => Object.values(r).every(v => !isNil(v) && String(v).trim() !== ''));
+    log.push('Dropped ' + (before - out.length) + ' row(s) containing missing values.');
+  }
+  if (opts.fillNumeric){
+    resultColumns.filter(c => c.type === 'number').forEach(c => {
+      const nums = out.map(r => r[c.name]).filter(v => typeof v === 'number' && !Number.isNaN(v));
+      if (!nums.length) return;
+      let fill;
+      if (opts.fillNumeric === 'mean') fill = nums.reduce((a, b) => a + b, 0) / nums.length;
+      else { const s = [...nums].sort((a, b) => a - b); fill = s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2; }
+      let n = 0;
+      out.forEach(r => { if (r[c.name] === null || r[c.name] === undefined){ r[c.name] = Math.round(fill * 100) / 100; n++; } });
+      if (n) log.push('Filled ' + n + ' missing value(s) in "' + c.name + '" with ' + opts.fillNumeric + ' (' + fmtNum(fill) + ').');
+    });
+  }
+  if (opts.fillCategorical){
+    resultColumns.filter(c => c.type !== 'number').forEach(c => {
+      const counts = {};
+      out.forEach(r => { const v = r[c.name]; if (!isNil(v) && String(v).trim() !== '') counts[v] = (counts[v] || 0) + 1; });
+      const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+      if (!top) return;
+      let n = 0;
+      out.forEach(r => { if (isNil(r[c.name]) || String(r[c.name]).trim() === ''){ r[c.name] = top[0]; n++; } });
+      if (n) log.push('Filled ' + n + ' missing value(s) in "' + c.name + '" with the most frequent value "' + top[0] + '".');
+    });
+  }
+  return {rows: out, log, columns: resultColumns};
+}
+function renderCleaning(){
+  const el = $('#cleaningBody');
+  if (!state.dataset){
+    el.innerHTML = '<div class="card pad"><div class="empty"><div class="empty-ico"><i data-lucide="wand-2"></i></div><h4>Nothing to clean yet</h4><p>Upload a dataset first. DataMind AI will detect missing values, duplicates and empty columns automatically.</p><button class="btn btn-primary btn-sm" data-goto="upload"><i data-lucide="upload-cloud"></i> Upload Dataset</button></div></div>';
+    icons(); return;
+  }
+  const rows = state.dataset.rows;
+  const cols = state.dataset.columns;
+  const miss = cols.reduce((a, c) => a + missingFor(rows, c.name), 0);
+  const dup = duplicatesFor(rows);
+  const emptyCols = cols.filter(c => rows.every(r => isNil(r[c.name]) || String(r[c.name]).trim() === ''));
+
+  el.innerHTML = `
+    <div class="stat-grid" style="margin-top:0">
+      <div class="stat"><div class="stat-top"><div class="stat-ico tone-amber"><i data-lucide="alert-triangle"></i></div><div class="stat-label">Missing Cells</div></div><div class="stat-value">${fmtNum(miss)}</div><div class="stat-foot">In original dataset</div></div>
+      <div class="stat"><div class="stat-top"><div class="stat-ico tone-red"><i data-lucide="copy"></i></div><div class="stat-label">Duplicates</div></div><div class="stat-value">${fmtNum(dup)}</div><div class="stat-foot">Identical rows</div></div>
+      <div class="stat"><div class="stat-top"><div class="stat-ico tone-slate"><i data-lucide="square-dashed"></i></div><div class="stat-label">Empty Columns</div></div><div class="stat-value">${emptyCols.length}</div><div class="stat-foot">Fully null fields</div></div>
+      <div class="stat"><div class="stat-top"><div class="stat-ico tone-green"><i data-lucide="layers"></i></div><div class="stat-label">Original Rows</div></div><div class="stat-value">${fmtNum(rows.length)}</div><div class="stat-foot">Never overwritten</div></div>
+    </div>
+
+    <div class="card pad mt18">
+      <div class="card-head"><h3>Cleaning Operations</h3><span class="chip"><i data-lucide="shield-check"></i><span>Applied to a copy</span></span></div>
+      <div class="opt-list">
+        <label class="opt"><input type="checkbox" id="optDup" /><div><strong>Remove duplicate rows</strong><small>Deletes fully identical records (${dup} detected)</small></div></label>
+        <label class="opt"><input type="checkbox" id="optDropMissing" /><div><strong>Drop rows with missing values</strong><small>Keeps only complete records</small></div></label>
+        <label class="opt"><input type="checkbox" id="optEmptyCols" ${emptyCols.length ? '' : 'disabled'} /><div><strong>Drop empty columns</strong><small>${emptyCols.length} fully empty column(s) found</small></div></label>
+        <label class="opt"><input type="checkbox" id="optFillNum" /><div><strong>Fill numeric with mean / median</strong><small>Imputes missing numbers statistically</small></div></label>
+        <label class="opt"><input type="checkbox" id="optFillCat" /><div><strong>Fill categorical with mode</strong><small>Uses the most frequent value</small></div></label>
+      </div>
+      <div class="row mt18" id="fillModeRow" style="display:none">
+        <div class="field" style="max-width:220px"><label>Numeric fill strategy</label>
+          <select id="fillMode"><option value="mean">Mean</option><option value="median">Median</option></select>
+        </div>
+      </div>
+      <div class="row mt18">
+        <button class="btn btn-primary btn-sm" id="previewClean"><i data-lucide="eye"></i> Preview Changes</button>
+        <button class="btn btn-outline btn-sm" id="applyClean" disabled><i data-lucide="check"></i> Apply to Cleaned Copy</button>
+        <button class="btn btn-outline btn-sm" id="resetClean" ${state.cleaned ? '' : 'disabled'}><i data-lucide="rotate-ccw"></i> Reset Cleaned Copy</button>
+      </div>
+    </div>
+
+    <div class="card pad mt18" id="cleanPreviewCard" style="display:none">
+      <div class="card-head"><h3>Before / After Preview</h3><span class="chip" id="cleanDelta">—</span></div>
+      <div id="cleanPreviewBody"></div>
+    </div>
+
+    <div class="card pad mt18" id="cleanResultCard" style="display:none">
+      <div class="card-head"><h3>Cleaning Summary</h3><span class="chip ok"><i data-lucide="check-circle-2"></i><span>Cleaned copy ready</span></span></div>
+      <div id="cleanResultBody"></div>
+    </div>`;
+
+  const fillNum = $('#optFillNum');
+  fillNum.onchange = () => { $('#fillModeRow').style.display = fillNum.checked ? 'flex' : 'none'; };
+
+  $('#previewClean').onclick = previewCleaning;
+  $('#applyClean').onclick = applyCleaning;
+  $('#resetClean').onclick = () => {
+    apiRequest('/api/clean/reset', {}).catch(err=>console.warn('Backend clean reset skipped:',err.message));
+    state.cleaned = null; state.useCleaned = false;
+    persistState();
+    toast('Cleaned copy discarded. Original data restored.', 'info');
+    logActivity('rotate-ccw', 'Reset cleaned copy.');
+    renderAll();
+  };
+  if (state.cleaned) renderCleanResult();
+  icons();
+}
+function gatherCleanOpts(){
+  return {
+    dropDuplicates: $('#optDup').checked,
+    dropMissingRows: $('#optDropMissing').checked,
+    dropEmptyCols: $('#optEmptyCols').checked,
+    fillNumeric: $('#optFillNum').checked ? $('#fillMode').value : null,
+    fillCategorical: $('#optFillCat').checked
+  };
+}
+let pendingClean = null;
+function previewCleaning(){
+  const opts = gatherCleanOpts();
+  if (!opts.dropDuplicates && !opts.dropMissingRows && !opts.dropEmptyCols && !opts.fillNumeric && !opts.fillCategorical){
+    toast('Select at least one cleaning operation.', 'err'); return;
+  }
+  const res = applyCleaningOps(state.dataset.rows, state.dataset.columns, opts);
+  pendingClean = res;
+  const card = $('#cleanPreviewCard');
+  card.style.display = 'block';
+  const before = state.dataset.rows.length;
+  const after = res.rows.length;
+  $('#cleanDelta').innerHTML = '<i data-lucide="arrow-right"></i><span>' + before + ' → ' + after + ' rows</span>';
+
+  const profAfter = profileData(res.rows, res.columns);
+  $('#cleanPreviewBody').innerHTML = `
+    <div class="table-wrap"><table class="dt"><thead><tr><th>Metric</th><th class="num">Before</th><th class="num">After</th></tr></thead><tbody>
+      <tr><td>Rows</td><td class="num">${before}</td><td class="num"><strong>${after}</strong></td></tr>
+      <tr><td>Missing cells</td><td class="num">${state.dataset.profile.totalMissing}</td><td class="num"><strong>${profAfter.totalMissing}</strong></td></tr>
+      <tr><td>Duplicate rows</td><td class="num">${state.dataset.profile.duplicates}</td><td class="num"><strong>${profAfter.duplicates}</strong></td></tr>
+      <tr><td>Columns</td><td class="num">${state.dataset.profile.colCount}</td><td class="num"><strong>${profAfter.colCount}</strong></td></tr>
+    </tbody></table></div>
+    <div style="margin-top:14px">
+      <div class="card-head" style="margin-bottom:8px"><h3 style="font-size:12.8px">Operation Log</h3></div>
+      <ul style="margin:0;padding-left:18px;font-size:12.8px;color:#526179;line-height:1.9">
+        ${res.log.length ? res.log.map(l => '<li>' + esc(l) + '</li>').join('') : '<li>No changes were required.</li>'}
+      </ul>
+    </div>
+    <div class="card-head" style="margin-top:16px;margin-bottom:10px"><h3 style="font-size:12.8px">Preview of Cleaned Rows</h3></div>
+    ${renderTable(res.rows, res.columns.map(c => c.name).slice(0, 8), 6)}`;
+  $('#applyClean').disabled = false;
+  icons();
+  card.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+}
+function applyCleaning(){
+  if (!pendingClean){ toast('Preview the changes first.', 'err'); return; }
+  loading(true, 'Applying cleaning operations…');
+  setTimeout(async () => {
+    const opts=gatherCleanOpts();
+    try {
+      await apiRequest('/api/clean', {drop_duplicates:opts.dropDuplicates,drop_missing_rows:opts.dropMissingRows,drop_empty_cols:opts.dropEmptyCols,fill_numeric:opts.fillNumeric,fill_categorical:opts.fillCategorical});
+    } catch(err) { console.warn('Backend cleaning unavailable; browser cleaning copy remains active:',err.message); }
+    state.cleaned = {rows: pendingClean.rows, columns: pendingClean.columns, summary: pendingClean.log, at: new Date(), before: state.dataset.rows.length};
+    persistState();
+    loading(false);
+    toast('Cleaned copy created with ' + pendingClean.rows.length + ' rows.', 'ok');
+    logActivity('wand-2', 'Created cleaned copy (' + pendingClean.rows.length + ' rows).');
+    renderAll();
+  }, 550);
+}
+function renderCleanResult(){
+  const card = $('#cleanResultCard');
+  if (!card || !state.cleaned) return;
+  card.style.display = 'block';
+  $('#cleanResultBody').innerHTML = `
+    <div class="row" style="margin-bottom:14px">
+      <label class="switch"><input type="checkbox" id="useCleanedToggle" ${state.useCleaned ? 'checked' : ''} /><span class="track"></span>
+        Use cleaned data for analysis &amp; charts</label>
+      <span class="chip" style="margin-left:auto"><i data-lucide="clock"></i><span>${state.cleaned.at.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span></span>
+    </div>
+    <ul style="margin:0 0 16px;padding-left:18px;font-size:12.9px;color:#526179;line-height:1.9">
+      ${state.cleaned.summary.length ? state.cleaned.summary.map(l => '<li>' + esc(l) + '</li>').join('') : '<li>No changes were applied.</li>'}
+    </ul>
+    <div class="row">
+      <button class="btn btn-primary btn-sm" id="dlCleanCsv"><i data-lucide="download"></i> Download Cleaned CSV</button>
+      <button class="btn btn-outline btn-sm" id="dlCleanXlsx"><i data-lucide="file-spreadsheet"></i> Download Cleaned Excel</button>
+    </div>`;
+  const tg = $('#useCleanedToggle');
+  if (tg) tg.onchange = () => {
+    state.useCleaned = tg.checked;
+    persistState();
+    toast(tg.checked ? 'Analysis now uses the cleaned copy.' : 'Analysis now uses the original data.', 'info');
+    renderAll();
+  };
+  const c1 = $('#dlCleanCsv'); if (c1) c1.onclick = () => downloadCSV(state.cleaned.rows, 'DataMind_cleaned.csv');
+  const c2 = $('#dlCleanXlsx'); if (c2) c2.onclick = () => downloadXLSX(state.cleaned.rows, 'DataMind_cleaned.xlsx');
+  icons();
+}
+
+/* ---------------- downloads ---------------- */
+function downloadCSV(rows, filename){
+  if (!rows.length){ toast('Nothing to download.', 'err'); return; }
+  const csv = Papa.unparse(rows);
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+  triggerDownload(blob, filename);
+  toast('CSV downloaded.', 'ok');
+}
+function downloadXLSX(rows, filename){
+  try {
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Data');
+    XLSX.writeFile(wb, filename);
+    toast('Excel file downloaded.', 'ok');
+  } catch (e){ toast('Excel export failed.', 'err'); }
+}
+function triggerDownload(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 500);
+}
+
+/* ---------------- reports ---------------- */
+function renderReports(){
+  const el = $('#reportsBody');
+  if (!state.dataset){
+    el.innerHTML = '<div class="card pad"><div class="empty"><div class="empty-ico"><i data-lucide="file-text"></i></div><h4>No report available</h4><p>Reports are generated from real analysis. Load a dataset to enable PDF and Excel exports.</p><button class="btn btn-primary btn-sm" data-goto="upload"><i data-lucide="upload-cloud"></i> Upload Dataset</button></div></div>';
+    icons(); return;
+  }
+  const p = getProfile();
+  const d = state.dataset;
+  el.innerHTML = `
+    <div class="grid-2-eq" style="margin-top:0">
+      <div class="card pad">
+        <div class="insight-top">
+          <div class="insight-ico tone-red"><i data-lucide="file-text"></i></div>
+          <h4>PDF Analysis Report</h4>
+        </div>
+        <p style="font-size:12.9px;color:#526179;line-height:1.7;margin:0 0 14px">
+          A formatted document containing the dataset name, dimensions, column types, descriptive statistics,
+          missing values, duplicates, insights summary and cleaning status.
+        </p>
+        <button class="btn btn-primary btn-sm" id="dlPdf"><i data-lucide="download"></i> Download PDF</button>
+      </div>
+      <div class="card pad">
+        <div class="insight-top">
+          <div class="insight-ico tone-green"><i data-lucide="file-spreadsheet"></i></div>
+          <h4>Excel Workbook</h4>
+        </div>
+        <p style="font-size:12.9px;color:#526179;line-height:1.7;margin:0 0 14px">
+          A multi-sheet workbook with the raw data, column profile, numeric statistics, insights
+          and the cleaning log — all generated from your uploaded file.
+        </p>
+        <button class="btn btn-primary btn-sm" id="dlXlsx"><i data-lucide="download"></i> Download Excel</button>
+      </div>
+    </div>
+
+    <div class="card pad mt18">
+      <div class="card-head"><h3>Report Contents Preview</h3><span class="chip"><i data-lucide="eye"></i><span>Live data</span></span></div>
+      <div class="table-wrap"><table class="dt"><thead><tr><th>Section</th><th>Included Data</th></tr></thead><tbody>
+        <tr><td><strong>Header</strong></td><td>DataMind AI · ${esc(d.name)} · ${new Date().toLocaleString()}</td></tr>
+        <tr><td><strong>Dimensions</strong></td><td>${fmtNum(p.rowCount)} rows × ${p.colCount} columns</td></tr>
+        <tr><td><strong>Column Types</strong></td><td>${p.cols.map(c => esc(c.name) + ' (' + c.type + ')').join(', ')}</td></tr>
+        <tr><td><strong>Statistics</strong></td><td>${p.cols.filter(c => c.type === 'number').length} numeric columns with mean, median, min, max, std dev</td></tr>
+        <tr><td><strong>Data Quality</strong></td><td>${fmtNum(p.totalMissing)} missing cells · ${p.duplicates} duplicate rows</td></tr>
+        <tr><td><strong>Insights</strong></td><td>${computeInsights().length} computed insights and interpretations</td></tr>
+        <tr><td><strong>Cleaning</strong></td><td>${state.cleaned ? state.cleaned.summary.length + ' operation(s) applied' : 'No cleaning applied'}</td></tr>
+      </tbody></table></div>
+    </div>`;
+  $('#dlPdf').onclick = generatePDF;
+  $('#dlXlsx').onclick = generateExcelReport;
+  icons();
+}
+
+function generatePDF(){
+  if (!state.dataset){ toast('No dataset loaded.', 'err'); return; }
+  loading(true, 'Building PDF report…');
+  setTimeout(() => {
+    try {
+      const {jsPDF} = window.jspdf;
+      const doc = new jsPDF({unit: 'pt', format: 'a4'});
+      const p = getProfile();
+      const d = state.dataset;
+      const marginX = 46;
+      let y = 56;
+      const W = 595;
+
+      const addPageIfNeeded = (need = 24) => {
+        if (y + need > 800){ doc.addPage(); y = 56; }
+      };
+      const heading = (txt) => {
+        addPageIfNeeded(40);
+        y += 8;
+        doc.setFillColor(59, 110, 246);
+        doc.rect(marginX, y - 11, 3, 14, 'F');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.setTextColor(15, 23, 42);
+        doc.text(txt, marginX + 11, y);
+        y += 14;
+      };
+      const line = (txt, opts = {}) => {
+        doc.setFont('helvetica', opts.bold ? 'bold' : 'normal');
+        doc.setFontSize(opts.size || 9.6);
+        doc.setTextColor(opts.color || 70, opts.color || 82, opts.color || 104);
+        const parts = doc.splitTextToSize(String(txt), W - marginX * 2 - 4);
+        parts.forEach(part => { addPageIfNeeded(16); doc.text(part, marginX + 4, y); y += 13; });
+      };
+
+      // Header band
+      doc.setFillColor(11, 18, 32);
+      doc.rect(0, 0, W, 96, 'F');
+      doc.setFillColor(59, 110, 246);
+      doc.roundedRect(marginX, 26, 34, 34, 8, 8, 'F');
+      doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(17);
+      doc.text('DataMind AI', marginX + 46, 45);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(160, 180, 210);
+      doc.text('Intelligent Natural Language Data Analyst', marginX + 46, 60);
+      doc.setFontSize(8.4); doc.setTextColor(130, 150, 185);
+      doc.text('Generated: ' + new Date().toLocaleString(), marginX, 82);
+
+      y = 122;
+      doc.setTextColor(15, 23, 42); doc.setFont('helvetica', 'bold'); doc.setFontSize(15);
+      doc.text('Dataset Analysis Report', marginX, y); y += 20;
+      line('Dataset: ' + d.name + (d.isSample ? '  (built-in sample dataset)' : ''), {bold: true, size: 10.5, color: 45});
+      line('Dimensions: ' + p.rowCount + ' rows  x  ' + p.colCount + ' columns');
+      line('Missing cells: ' + p.totalMissing + '   |   Duplicate rows: ' + p.duplicates);
+      line('Cleaned copy in use: ' + (state.cleaned ? (state.useCleaned ? 'Yes' : 'Available but not active') : 'No'));
+
+      heading('Column Profile');
+      p.cols.forEach(c => {
+        line('- ' + c.name + '  [' + c.type + ']   non-null: ' + c.count + '   missing: ' + c.missing + '   unique: ' + c.unique +
+          (c.top ? '   top: ' + c.top.value : ''));
+      });
+
+      const nums = p.cols.filter(c => c.type === 'number');
+      if (nums.length){
+        heading('Descriptive Statistics');
+        nums.forEach(c => {
+          line(c.name + ':  mean=' + fmtNum(c.mean) + '  median=' + fmtNum(c.median) + '  min=' + fmtNum(c.min) +
+            '  max=' + fmtNum(c.max) + '  std=' + fmtNum(c.std) + '  count=' + fmtNum(c.count));
+        });
+      }
+
+      heading('Insights');
+      const ins = computeInsights();
+      ins.forEach(i => {
+        const plain = i.title + ' — ' + String(i.text).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+        line('• ' + plain);
+      });
+
+      heading('Cleaning Summary');
+      if (state.cleaned && state.cleaned.summary.length){
+        state.cleaned.summary.forEach(l => line('• ' + l));
+      } else {
+        line('No cleaning operations have been applied to this dataset.');
+      }
+
+      heading('Chart Summary');
+      const dim = primaryDimension(), metric = primaryMetric();
+      if (dim && metric){
+        const agg = aggregate(dim, metric, 'SUM').slice(0, 10);
+        line('Aggregation: SUM(' + metric + ') grouped by ' + dim);
+        agg.forEach(a => line('  - ' + a.label + ': ' + fmtNum(a.value)));
+      } else {
+        line('Not enough numeric and categorical columns to build a chart summary.');
+      }
+
+      // Embed an actual chart image when a Chart.js instance is available
+      const chartInst = state.charts.main || state.charts.dash;
+      if (chartInst){
+        try {
+          addPageIfNeeded(260);
+          heading('Chart Image');
+          const img = chartInst.toBase64Image();
+          const imgW = W - marginX * 2;
+          const imgH = 220;
+          doc.addImage(img, 'PNG', marginX, y, imgW, imgH);
+          y += imgH + 10;
+          line('Chart rendered from the current dataset selection.', {size: 8.5, color: 120});
+        } catch(e){ line('Chart image could not be embedded: ' + e.message); }
+      } else {
+        line('No chart is currently rendered; open the Visualizations page to generate one for inclusion.');
+      }
+
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++){
+        doc.setPage(i);
+        doc.setFontSize(8); doc.setTextColor(150, 160, 178);
+        doc.text('DataMind AI  ·  Page ' + i + ' of ' + pageCount, marginX, 820);
+        doc.text('Ask Your Data. Get Intelligent Answers.', W - marginX, 820, {align: 'right'});
+      }
+
+      const safe = d.name.replace(/\.[^.]+$/, '').replace(/[^\w-]+/g, '_').slice(0, 40);
+      doc.save('DataMind_Report_' + safe + '.pdf');
+      loading(false);
+      toast('PDF report downloaded.', 'ok');
+      logActivity('file-text', 'Exported PDF report.');
+    } catch (e){
+      loading(false);
+      toast('PDF generation failed: ' + e.message, 'err');
+    }
+  }, 600);
+}
+
+function generateExcelReport(){
+  if (!state.dataset){ toast('No dataset loaded.', 'err'); return; }
+  loading(true, 'Building Excel workbook…');
+  setTimeout(() => {
+    try {
+      const p = getProfile();
+      const d = state.dataset;
+      const wb = XLSX.utils.book_new();
+
+      const summary = [
+        ['DataMind AI — Dataset Analysis Report'],
+        ['Generated', new Date().toLocaleString()],
+        ['Dataset', d.name],
+        ['Source', d.isSample ? 'Built-in sample dataset' : 'User upload'],
+        ['Rows', p.rowCount],
+        ['Columns', p.colCount],
+        ['Missing Cells', p.totalMissing],
+        ['Duplicate Rows', p.duplicates],
+        ['Cleaned Copy', state.cleaned ? 'Available' : 'None'],
+        ['Analysis Uses', state.useCleaned && state.cleaned ? 'Cleaned copy' : 'Original data']
+      ];
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summary), 'Summary');
+
+      const profileSheet = p.cols.map(c => ({
+        Column: c.name, Type: c.type, 'Non-Null': c.count, Missing: c.missing, Unique: c.unique,
+        Mean: c.mean ?? '', Median: c.median ?? '', Min: c.min ?? '', Max: c.max ?? '',
+        'Std Dev': c.std ?? '', Sum: c.sum ?? '', 'Top Value': c.top ? c.top.value : ''
+      }));
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(profileSheet), 'Column Profile');
+
+      const insights = computeInsights().map(i => ({
+        Title: i.title,
+        Type: i.tag === 'ai' ? 'Computed Interpretation' : i.tag === 'warn' ? 'Attention' : 'Computed Fact',
+        Detail: String(i.text).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
+      }));
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(insights), 'Insights');
+
+      const cleanLog = state.cleaned && state.cleaned.summary.length
+        ? state.cleaned.summary.map((l, i) => ({Step: i + 1, Operation: l}))
+        : [{Step: 1, Operation: 'No cleaning applied'}];
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cleanLog), 'Cleaning Log');
+
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(getRows()), 'Data');
+
+      const safe = d.name.replace(/\.[^.]+$/, '').replace(/[^\w-]+/g, '_').slice(0, 40);
+      XLSX.writeFile(wb, 'DataMind_Report_' + safe + '.xlsx');
+      loading(false);
+      toast('Excel report downloaded.', 'ok');
+      logActivity('file-spreadsheet', 'Exported Excel report.');
+    } catch (e){
+      loading(false);
+      toast('Excel generation failed: ' + e.message, 'err');
+    }
+  }, 600);
+}
+
+/* ---------------- machine learning ---------------- */
+function selectedValues(id){ return Array.from(document.getElementById(id)?.selectedOptions || []).map(o=>o.value); }
+function renderMLView(){
+  const note = $('#mlBackendNote');
+  if (!state.dataset){
+    ['mlTarget','mlPredictFeatures','mlAnomalyFeatures','mlSegmentFeatures'].forEach(id=>{const el=$('#'+id);if(el)el.innerHTML='';});
+    if(note) note.textContent='Upload a dataset first. The Flask backend with scikit-learn is required for ML models.';
+    return;
+  }
+  const cols = getColumns();
+  const nums = cols.filter(c=>c.type==='number').map(c=>c.name);
+  const target = $('#mlTarget');
+  target.innerHTML = nums.map(c=>'<option value="'+esc(c)+'" '+(/sales|revenue|profit|amount/i.test(c)?'selected':'')+'>'+esc(c)+'</option>').join('');
+  if (!target.value && nums.length) target.selectedIndex=0;
+  const allFeatures = cols.map(c=>c.name).filter(c=>c!==target.value);
+  $('#mlPredictFeatures').innerHTML = allFeatures.map(c=>'<option value="'+esc(c)+'" selected>'+esc(c)+'</option>').join('');
+  const numOpts = nums.map(c=>'<option value="'+esc(c)+'" selected>'+esc(c)+'</option>').join('');
+  $('#mlAnomalyFeatures').innerHTML = numOpts;
+  $('#mlSegmentFeatures').innerHTML = numOpts;
+  if(note) note.textContent = state.backendConnected ? 'Connected to Flask backend. Models use scikit-learn.' : 'Machine-learning features require a running Flask backend with scikit-learn. See Settings → Backend Connection.';
+}
+function mlTable(columns, rows){
+  if(!rows || !rows.length) return '<p class="hint">No result rows.</p>';
+  return '<div class="table-wrap"><table class="dt"><thead><tr>'+columns.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(v=>'<td>'+esc(v===null?'—':typeof v==='number'?fmtNum(v):v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+}
+async function runML(path, body, resultId, renderer){
+  if(!state.dataset){toast('Upload a dataset first.','err');return;}
+  const el=$('#'+resultId); el.innerHTML='<p class="hint">Training model and evaluating results…</p>';
+  try { const data=await apiRequest(path,body); el.innerHTML=renderer(data); toast('Machine-learning analysis completed.','ok'); }
+  catch(err){el.innerHTML='<div class="empty"><h4>Could not run model</h4><p>'+esc(err.message)+'</p></div>';toast(err.message,'err');}
+}
+$('#mlPredict').addEventListener('click',()=>runML('/api/ml/predict',{target:$('#mlTarget').value,features:selectedValues('mlPredictFeatures'),use_cleaned:state.useCleaned},'mlPredictResult',d=>{
+  const m=d.metrics;
+  return '<div class="stat-grid"><div class="stat"><div class="stat-label">MAE</div><div class="stat-value">'+fmtNum(m.mae)+'</div><div class="stat-foot">Mean absolute error</div></div><div class="stat"><div class="stat-label">RMSE</div><div class="stat-value">'+fmtNum(m.rmse)+'</div><div class="stat-foot">Root mean squared error</div></div><div class="stat"><div class="stat-label">R²</div><div class="stat-value">'+(m.r2===null?'—':fmtNum(m.r2))+'</div><div class="stat-foot">Explained variance score</div></div></div><p class="hint mt18">'+esc(d.model)+' · Target: '+esc(d.target)+' · '+d.train_rows+' training rows / '+d.test_rows+' test rows · Features: '+esc(d.features.join(', '))+'</p>'+mlTable(['Actual','Predicted','Error'],d.predictions.map(x=>[x.actual,x.predicted,x.error]))+'<p class="hint">'+esc(d.note)+'</p>';
+}));
+$('#mlAnomalies').addEventListener('click',()=>runML('/api/ml/anomalies',{features:selectedValues('mlAnomalyFeatures'),use_cleaned:state.useCleaned},'mlAnomalyResult',d=>'<div class="stat-grid"><div class="stat"><div class="stat-label">Rows scanned</div><div class="stat-value">'+fmtNum(d.rows_scanned)+'</div></div><div class="stat"><div class="stat-label">Anomalies</div><div class="stat-value">'+fmtNum(d.anomaly_count)+'</div></div><div class="stat"><div class="stat-label">Flagged</div><div class="stat-value">'+d.anomaly_percent+'%</div></div></div><p class="hint">'+esc(d.model)+' · Features: '+esc(d.features.join(', '))+'</p>'+mlTable(['Row','Score',...d.features],d.anomalies.map(x=>[x.row_number,x.anomaly_score,...d.features.map(f=>x[f])]))+'<p class="hint">'+esc(d.note)+'</p>'));
+$('#mlSegments').addEventListener('click',()=>runML('/api/ml/segments',{features:selectedValues('mlSegmentFeatures'),clusters:Number($('#mlClusterCount').value),use_cleaned:state.useCleaned},'mlSegmentResult',d=>'<p class="hint">'+esc(d.model)+' · '+d.rows_segmented+' rows · '+d.clusters+' clusters · Features: '+esc(d.features.join(', '))+'</p>'+mlTable(['Cluster','Rows / Customers',...d.features],d.summary.map(x=>[x.cluster,x.customers_or_rows,...d.features.map(f=>x.profile[f])]))+'<p class="hint">'+esc(d.note)+'</p>'+mlTable(['Row','Cluster'],d.assignments.slice(0,30).map(x=>[x.row_number,x.cluster]))));
+$('#mlTarget').addEventListener('change',()=>{ const target=$('#mlTarget').value; const features=getColumns().map(c=>c.name).filter(c=>c!==target); $('#mlPredictFeatures').innerHTML=features.map(c=>'<option value="'+esc(c)+'" selected>'+esc(c)+'</option>').join(''); });
+
+/* ---------------- settings ---------------- */
+function renderSettings(){
+  const d = state.dataset;
+  const p = getProfile();
+  $('#settingsBody').innerHTML = `
+    <div class="grid-2-eq" style="margin-top:0">
+      <div class="card pad">
+        <div class="card-head"><h3>Application</h3></div>
+        <div class="table-wrap"><table class="dt"><tbody>
+          <tr><td><strong>Name</strong></td><td>DataMind AI</td></tr>
+          <tr><td><strong>Tagline</strong></td><td>Ask Your Data. Get Intelligent Answers.</td></tr>
+          <tr><td><strong>Version</strong></td><td>2.0.0</td></tr>
+          <tr><td><strong>Analytics Engine</strong></td><td>Browser analytics + optional Flask/Pandas backend</td></tr>
+          <tr><td><strong>SQL Safety</strong></td><td>Read-only SELECT validation + SQLite authorizer</td></tr>
+          <tr><td><strong>Max Upload</strong></td><td>10 MB · CSV, XLSX, XLS</td></tr>
+        </tbody></table></div>
+      </div>
+      <div class="card pad">
+        <div class="card-head"><h3>Current Dataset</h3></div>
+        ${d ? `<div class="table-wrap"><table class="dt"><tbody>
+          <tr><td><strong>File</strong></td><td>${esc(d.name)}</td></tr>
+          <tr><td><strong>Rows</strong></td><td>${fmtNum(p.rowCount)}</td></tr>
+          <tr><td><strong>Columns</strong></td><td>${p.colCount}</td></tr>
+          <tr><td><strong>Missing</strong></td><td>${fmtNum(p.totalMissing)}</td></tr>
+          <tr><td><strong>Duplicates</strong></td><td>${fmtNum(p.duplicates)}</td></tr>
+          <tr><td><strong>Loaded</strong></td><td>${d.at.toLocaleString()}</td></tr>
+        </tbody></table></div>
+        <div class="row mt18">
+          <button class="btn btn-outline btn-sm" id="setSample"><i data-lucide="database"></i> Load Sample Dataset</button>
+          <button class="btn btn-danger btn-sm" id="setClear"><i data-lucide="trash-2"></i> Clear Dataset</button>
+        </div>`
+        : '<div class="empty" style="padding:28px"><div class="empty-ico"><i data-lucide="database"></i></div><h4>No dataset loaded</h4><p>Load the sample dataset to explore every feature.</p><button class="btn btn-primary btn-sm" id="setSample"><i data-lucide="database"></i> Load Sample Dataset</button></div>'}
+      </div>
+    </div>
+
+    <div class="card pad mt18">
+      <div class="card-head"><h3>Backend Connection</h3><span class="chip">Flask API</span></div>
+      <p class="hint">Enter the URL where your Flask backend is deployed. For local development, use http://127.0.0.1:5000. Keep API keys on the server, never in this field.</p>
+      <div class="row"><div class="field" style="flex:1"><label for="backendUrl">Backend base URL</label><input id="backendUrl" type="url" placeholder="http://127.0.0.1:5000" value="${esc(apiBase())}" /></div><button class="btn btn-primary btn-sm" id="saveBackendUrl" style="align-self:end">Save &amp; reconnect</button></div>
+      <div class="hint mt18" id="backendStatus">Backend connection is checked when a dataset is loaded.</div>
+    </div>
+
+    <div class="card pad mt18">
+      <div class="card-head"><h3>About the analytics engine</h3></div>
+      <p style="font-size:13px;color:#526179;line-height:1.75;margin:0">
+        DataMind AI runs a complete statistics pipeline in your browser: parsing, type inference, descriptive statistics,
+        duplicate detection, aggregation, a safe read-only SQL subset interpreter, and report generation.
+        Core profiling and charts are calculated in the browser. When the Flask backend is connected, a copy of the current dataset is sent to the configured server for SQL execution, ML model training and optional Gemini-assisted explanations. Configure CORS and deployment security before using confidential data. Gemini is optional and the deterministic local analytics fallback remains available.
+      </p>
+      <div class="row mt18" style="gap:8px">
+        <span class="chip"><i data-lucide="shield-check"></i><span>Read-only SQL</span></span>
+        <span class="chip"><i data-lucide="server"></i><span>Backend transfer is configurable</span></span>
+        <span class="chip"><i data-lucide="layers"></i><span>Original data preserved</span></span>
+      </div>
+    </div>`;
+
+  const s1 = $('#setSample'); if (s1) s1.onclick = loadSample;
+  const s2 = $('#setClear'); if (s2) s2.onclick = removeDataset;
+  const saveApi = $('#saveBackendUrl'); if (saveApi) saveApi.onclick = async () => { const value = ($('#backendUrl').value || '').trim().replace(/\/$/, ''); if (!/^https?:\/\//i.test(value)) { toast('Enter a valid http:// or https:// backend URL.', 'err'); return; } try { localStorage.setItem('datamind_api_url', value); apiSession = null; localStorage.removeItem(API_SESSION_KEY); await ensureApiSession(); if (state.dataset) await syncBackendDataset(state.dataset); $('#backendStatus').textContent = 'Backend session created successfully.'; toast('Backend URL saved.', 'ok'); } catch(err) { $('#backendStatus').textContent = err.message; toast(err.message, 'err'); } };
+  icons();
+}
+
+/* =====================================================================
+   ACTIONS
+   ===================================================================== */
+function loadSample(){
+  loading(true, 'Generating sample dataset…');
+  setTimeout(() => {
+    const {rows, headers} = makeSampleData();
+    loading(false);
+    loadDataset('sample_sales_data.csv', 0, rows, headers, true);
+    toast('Sample dataset loaded — all statistics are computed from this demo file.', 'ok');
+  }, 500);
+}
+function removeDataset(){
+  state.dataset = null;
+  state.cleaned = null;
+  state.useCleaned = false;
+  state.chat = [];
+  state.lastSQL = null;
+  state.lastResult = null;
+  state.insights = [];
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e){}
+  logActivity('trash-2', 'Dataset removed from the workspace.');
+  toast('Dataset removed.', 'info');
+  renderAll();
+}
+
+/* =====================================================================
+   NAVIGATION
+   ===================================================================== */
+function showView(v){
+  if (!TITLES[v]) v = 'dashboard';
+  state.view = v;
+  $$('.view').forEach(s => s.classList.remove('active'));
+  const target = $('#view-' + v);
+  if (target) target.classList.add('active');
+  $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === v));
+  $('#pageTitle').textContent = TITLES[v][0];
+  $('#pageSub').textContent = TITLES[v][1];
+  $('#sidebar').classList.remove('open');
+  $('#overlay').classList.remove('on');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  renderView(v);
+}
+
+function renderView(v){
+  switch (v){
+    case 'dashboard': renderDashboard(); break;
+    case 'upload': renderUpload(); break;
+    case 'overview': renderOverview(); break;
+    case 'chat': renderChat(); renderChatSuggestions(); break;
+    case 'sql': renderSQLView(); runCurrentSQL(); break;
+    case 'viz': populateVizSelects(); renderMainChart(); break;
+    case 'insights': renderInsights(); break;
+    case 'ml': renderMLView(); break;
+    case 'cleaning': renderCleaning(); break;
+    case 'reports': renderReports(); break;
+    case 'settings': renderSettings(); break;
+  }
+  icons();
+}
+
+function renderAll(){
+  renderStatGrid('#dashStats');
+  updateDatasetChip();
+  renderView(state.view);
+  renderDashboard();
+}
+
+function updateDatasetChip(){
+  const chip = $('#datasetChip');
+  if (state.dataset){
+    const p = getProfile();
+    chip.className = 'chip ok';
+    chip.innerHTML = '<i data-lucide="database"></i><span>' + esc(state.dataset.name.length > 22 ? state.dataset.name.slice(0, 20) + '…' : state.dataset.name) + ' · ' + p.rowCount + '×' + p.colCount + '</span>';
+  } else {
+    chip.className = 'chip';
+    chip.innerHTML = '<i data-lucide="database"></i><span>No dataset</span>';
+  }
+  icons();
+}
+
+/* =====================================================================
+   FILE HANDLING
+   ===================================================================== */
+function handleFile(file){
+  if (!file) return;
+  const MAX = 10 * 1024 * 1024;
+  if (file.size > MAX){ toast('File is too large. Maximum allowed size is 10 MB.', 'err'); return; }
+  const name = file.name.toLowerCase();
+  const isCsv = name.endsWith('.csv') || name.endsWith('.txt');
+  const isXls = name.endsWith('.xlsx') || name.endsWith('.xls');
+  if (!isCsv && !isXls){ toast('Unsupported file type. Please upload a .csv, .xlsx or .xls file.', 'err'); return; }
+
+  loading(true, 'Parsing ' + file.name + '…');
+
+  if (isCsv){
+    Papa.parse(file, {
+      header: true, skipEmptyLines: 'greedy', dynamicTyping: false,
+      complete: res => {
+        loading(false);
+        if (res.errors && res.errors.length && (!res.meta.fields || !res.meta.fields.length)){
+          toast('Could not parse the CSV file. ' + (res.errors[0].message || ''), 'err'); return;
+        }
+        const headers = (res.meta.fields || []).filter(Boolean);
+        if (!headers.length){ toast('No columns detected in this CSV.', 'err'); return; }
+        loadDataset(file.name, file.size, res.data, headers, false);
+      },
+      error: err => { loading(false); toast('Failed to read the CSV file: ' + err.message, 'err'); }
+    });
+  } else {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(ws, {defval: ''});
+        loading(false);
+        if (!json.length){ toast('The first worksheet is empty.', 'err'); return; }
+        const headers = Object.keys(json[0]).filter(Boolean);
+        loadDataset(file.name, file.size, json, headers, false);
+      } catch (err){
+        loading(false);
+        toast('Failed to parse the Excel file.', 'err');
+      }
+    };
+    reader.onerror = () => { loading(false); toast('Could not read the file.', 'err'); };
+    reader.readAsArrayBuffer(file);
+  }
+}
+
+/* =====================================================================
+   EVENTS
+   ===================================================================== */
+document.addEventListener('click', e => {
+  const goto = e.target.closest('[data-goto]');
+  if (goto){ showView(goto.dataset.goto); return; }
+  const nav = e.target.closest('.nav-item');
+  if (nav){ showView(nav.dataset.view); return; }
+});
+
+$('#collapseBtn').addEventListener('click', () => {
+  $('#app').classList.toggle('collapsed');
+  setTimeout(() => { renderView(state.view); }, 300);
+});
+$('#menuBtn').addEventListener('click', () => {
+  $('#sidebar').classList.add('open');
+  $('#overlay').classList.add('on');
+});
+$('#overlay').addEventListener('click', () => {
+  $('#sidebar').classList.remove('open');
+  $('#overlay').classList.remove('on');
+});
+$('#heroSample').addEventListener('click', loadSample);
+$('#topSample').addEventListener('click', loadSample);
+$('#sampleBtn').addEventListener('click', loadSample);
+$('#bellBtn').addEventListener('click', () => {
+  toast(state.dataset ? 'Dataset "' + state.dataset.name + '" is loaded and ready.' : 'No notifications. Load a dataset to get started.', 'info');
+});
+$('#clearActivity').addEventListener('click', () => { state.activity = []; renderActivity(); });
+
+/* upload */
+$('#browseBtn').addEventListener('click', e => { e.stopPropagation(); $('#fileInput').click(); });
+$('#dropzone').addEventListener('click', () => $('#fileInput').click());
+$('#fileInput').addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); e.target.value = ''; });
+['dragenter', 'dragover'].forEach(ev => $('#dropzone').addEventListener(ev, e => { e.preventDefault(); $('#dropzone').classList.add('drag'); }));
+['dragleave', 'drop'].forEach(ev => $('#dropzone').addEventListener(ev, e => { e.preventDefault(); $('#dropzone').classList.remove('drag'); }));
+$('#dropzone').addEventListener('drop', e => {
+  const f = e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f) handleFile(f);
+});
+
+/* chat */
+$('#chatSend').addEventListener('click', sendChat);
+$('#chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); }
+});
+$('#chatInput').addEventListener('input', e => {
+  e.target.style.height = 'auto';
+  e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+});
+
+/* sql */
+$('#sqlGenerate').addEventListener('click', doGenerateSQL);
+$('#sqlQuestion').addEventListener('keydown', e => { if (e.key === 'Enter') doGenerateSQL(); });
+$('#sqlRun').addEventListener('click', runCurrentSQL);
+$('#sqlClear').addEventListener('click', () => {
+  $('#sqlQuestion').value = '';
+  state.lastSQL = null; state.lastResult = null;
+  $('#sqlOutput').innerHTML = '<span style="color:#62789c">// Generated SQL will appear here…</span>';
+  $('#sqlExplain').style.display = 'none';
+  $('#sqlRowCount').innerHTML = '<i data-lucide="rows-3"></i><span>—</span>';
+  $('#sqlResult').innerHTML = '<div class="empty"><div class="empty-ico"><i data-lucide="terminal"></i></div><h4>No query yet</h4><p>Generate a query from English or write your own and press Execute.</p></div>';
+  icons();
+});
+$('#sqlEditToggle').addEventListener('click', () => {
+  if (!state.lastSQL){ toast('Generate a query first.', 'err'); return; }
+  const current = state.lastSQL.sql;
+  const edited = prompt('Edit the SQL query (SELECT only):', current);
+  if (edited === null) return;
+  try {
+    validateSQL(edited);
+    state.lastSQL = {sql: edited.trim(), explanation: 'Manually edited query — validated as a read-only SELECT statement.', intent: 'custom'};
+    $('#sqlOutput').innerHTML = highlightSQL(state.lastSQL.sql) + '<button class="copy-btn" id="copySql2"><i data-lucide="copy"></i> Copy</button>';
+    $('#sqlExplain').style.display = 'block';
+    $('#sqlExplainText').textContent = state.lastSQL.explanation;
+    const cb = $('#copySql2');
+    if (cb) cb.onclick = () => navigator.clipboard.writeText(state.lastSQL.sql).then(() => toast('SQL copied', 'ok'));
+    icons();
+    runCurrentSQL();
+  } catch (err){ toast(err.message, 'err'); }
+});
+
+/* viz */
+['vizType', 'vizX', 'vizY', 'vizAgg'].forEach(id => {
+  document.addEventListener('change', e => { if (e.target && e.target.id === id) renderMainChart(); });
+});
+$('#vizRefresh').addEventListener('click', () => {
+  if (!state.dataset){ toast('Load a dataset first.', 'err'); return; }
+  renderMainChart(); toast('Chart refreshed from current data.', 'ok');
+});
+$('#vizAuto').addEventListener('click', autoSuggestViz);
+$('#vizDownload').addEventListener('click', () => {
+  const c = state.charts.main;
+  if (!c){ toast('No chart to download.', 'err'); return; }
+  const a = document.createElement('a');
+  a.href = c.toBase64Image();
+  a.download = 'DataMind_chart.png';
+  a.click();
+  toast('Chart image downloaded.', 'ok');
+});
+
+/* insights */
+$('#insightsRefresh').addEventListener('click', () => {
+  if (!state.dataset){ toast('Load a dataset first.', 'err'); return; }
+  renderInsights();
+  toast('Insights regenerated from current data.', 'ok');
+});
+
+/* keyboard shortcut */
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'){
+    e.preventDefault();
+    showView('chat');
+    setTimeout(() => $('#chatInput').focus(), 250);
+  }
+});
+
+/* window resize → re-render charts */
+let rzTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(rzTimer);
+  rzTimer = setTimeout(() => { if (state.view === 'dashboard' || state.view === 'viz') renderView(state.view); }, 220);
+});
+
+/* =====================================================================
+   INIT
+   ===================================================================== */
+(function init(){
+  const restored = restoreState();
+  icons();
+  renderStatGrid('#dashStats');
+  renderPreviewBlock();
+  renderQuickActions();
+  renderActivity();
+  updateDatasetChip();
+  renderChatSuggestions();
+  if (restored){ renderAll(); if (state.dataset) { syncBackendDataset(state.dataset); toast('Previous dataset restored from this session.', 'info'); } }
+  $('#pageTitle').textContent = TITLES.dashboard[0];
+  $('#pageSub').textContent = TITLES.dashboard[1];
+  setTimeout(icons, 400);
+  setTimeout(icons, 1200);
+})();
+</script>
+</body>
+</html>
